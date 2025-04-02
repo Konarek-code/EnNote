@@ -15,6 +15,7 @@ app.use(express.json());
 const correctWordsFilePath = path.join(process.cwd(), "correctWords.json");
 const incorrectWordsFilePath = path.join(process.cwd(), "incorrectWords.json");
 const wordsFilePath = path.join(process.cwd(), "words.json");
+const counterFilePath = path.join(process.cwd(), "counter.json");
 
 // Funkcja do zapisu słowa w pliku JSON
 const saveWordToFile = (filePath, word, translations) => {
@@ -144,6 +145,7 @@ app.get("/get-correct-words", (req, res) => {
     res.status(200).json(words);
   });
 });
+
 // Uruchomienie serwera
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

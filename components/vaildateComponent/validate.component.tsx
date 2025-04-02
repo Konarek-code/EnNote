@@ -5,7 +5,7 @@ import {
   NativeSyntheticEvent,
   TextInputChangeEventData,
 } from "react-native";
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   Container,
   Input,
@@ -54,6 +54,37 @@ const WordValidator: React.FC = () => {
     fetchWords();
   }, []);
 
+  const fetchCounter = async () => {
+    try {
+      const storedCounter = await AsyncStorage.getItem("counter");
+      if (storedCounter !== null) {
+        setCounter(parseInt(storedCounter, 10));
+      } else {
+        setCounter(0);
+      }
+    } catch (error) {
+      console.error("Error fetching counter:", error);
+      setCounter(0);
+    }
+  };
+
+  const saveCounter = async (newCounter: number) => {
+    try {
+      await AsyncStorage.setItem("counter", newCounter.toString());
+      setCounter(newCounter);
+    } catch (error) {
+      console.error("Error saving counter:", error);
+    }
+  };
+  const incrementCounter = () => {
+    const newCounter = counter + 1;
+    saveCounter(newCounter);
+  };
+
+  useEffect(() => {
+    fetchCounter();
+  }, []);
+
   const handleInputChange = (text: string) => {
     setInputValue(text);
     setValidationMessage(null);
@@ -84,7 +115,6 @@ const WordValidator: React.FC = () => {
       );
 
       if (response.ok) {
-        setCounter((prevCounter) => prevCounter + 1);
         const data = await response.json();
         const translations = data.translations.map(
           (translation: any) => translation.text
@@ -109,6 +139,7 @@ const WordValidator: React.FC = () => {
             }),
           }
         );
+        incrementCounter();
       } else {
         setValidationMessage(`The word "${inputValue.trim()}" is invalid.`);
         setIsValid(false);
@@ -151,10 +182,9 @@ const WordValidator: React.FC = () => {
   };
 
   const checkAnswer = async () => {
-    const correctAnswer = words[currentWordIndex]?.translations; // Pobranie poprawnej odpowiedzi z listy słów
-    const trimmedUserAnswer = userAnswer.trim(); // Przygotowanie odpowiedzi użytkownika
+    const correctAnswer = words[currentWordIndex]?.translations;
+    const trimmedUserAnswer = userAnswer.trim();
 
-    // Sprawdzenie odpowiedzi
     if (
       correctAnswer &&
       correctAnswer.some(
@@ -207,7 +237,7 @@ const WordValidator: React.FC = () => {
     const nextIndex = currentWordIndex + 1;
     if (nextIndex < words.length) {
       setCurrentWordIndex(nextIndex);
-      setUserAnswer(""); // Wyczyszczenie pola odpowiedzi
+      setUserAnswer("");
     } else {
       alert(`Test finished! Your score: ${score + 1}/${words.length}`);
     }
@@ -218,7 +248,9 @@ const WordValidator: React.FC = () => {
     setCurrentWordIndex(0);
     clearWords();
     setScore(0);
-    window.location.reload();
+    setCounter(0); // Reset licznika, jeśli trzeba
+    setWords([]); // Reset listy słów
+    setUserAnswer(""); // Reset odpowiedzi użytkownika
   };
   return (
     <Container>
@@ -248,7 +280,7 @@ const WordValidator: React.FC = () => {
           {validationMessage && (
             <Message isValid={isValid}>{validationMessage}</Message>
           )}
-          {words.length >= 10 && (
+          {counter >= 10 && (
             <StyledButton title="Start Test" onPress={startTest} />
           )}
           <TranslationBar translation={currentTranslation} />
