@@ -1,5 +1,6 @@
 import styled from "styled-components/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { ScrollView } from "react-native";
 
 export const Container = styled(LinearGradient).attrs({
   colors: ["#0D47A1", "#311B92"],
@@ -7,9 +8,14 @@ export const Container = styled(LinearGradient).attrs({
   end: { x: 0, y: 1 },
 })`
   flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 20px;
+`;
+
+export const ScrollContainer = styled(ScrollView).attrs({
+  contentContainerStyle: {
+    alignItems: "center",
+    justifyContent: "flex-start",
+    paddingBottom: 30, // Zapewnia miejsce na przewijanie
+  },
+})`
   width: 100%;
 `;

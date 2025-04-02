@@ -2,38 +2,41 @@ import React from "react";
 import { Tabs } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StyleSheet } from "react-native";
+import NavigationBar from "@/components/navigationBar/navigationBar";
 
 export default () => {
   return (
     <Tabs
+      tabBar={(props) => <NavigationBar {...props} />}
       screenOptions={{
         headerShown: false,
         tabBarStyle: styles.tabBar,
         tabBarShowLabel: false,
       }}
     >
-      <Tabs.Screen
-        name="Menu"
-        options={{
-          tabBarIcon: () => (
-            <MaterialCommunityIcons name="menu" size={30} color="#fff" />
-          ),
-        }}
-      />
+      <Tabs.Screen name="menuPage.component" options={{}} />
       <Tabs.Screen
         name="Home"
         options={{
           title: "Home",
-          tabBarIcon: () => (
-            <MaterialCommunityIcons name="home" size={30} color="#fff" />
+          tabBarIcon: ({ focused }) => (
+            <MaterialCommunityIcons
+              name="home"
+              size={30}
+              color={focused ? "#FFD700" : "#fff"}
+            />
           ),
         }}
       />
       <Tabs.Screen
         name="Profile"
         options={{
-          tabBarIcon: () => (
-            <MaterialCommunityIcons name="account" size={30} color="#fff" />
+          tabBarIcon: ({ focused }) => (
+            <MaterialCommunityIcons
+              name="home"
+              size={30}
+              color={focused ? "#FFD700" : "#fff"}
+            />
           ),
         }}
       />

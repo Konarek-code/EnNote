@@ -4,7 +4,7 @@ export const Container = styled.View`
   width: 100%;
   max-height: 700px;
   padding: 20px;
-  background-color: rgb(18, 21, 54);
+  background-color: transparent;
   align-items: center;
   justify-content: center;
   border-radius: 10px;
@@ -19,19 +19,18 @@ export const StyledImage = styled.Image`
 `;
 
 export const Title = styled.Text`
-  font-size: 24px;
+  font-size: 26px;
   font-family: "IrishGrover-Regular";
   font-weight: bold;
   margin-bottom: 10px;
-  color: #fff;
+  color: #bbdefb;
 `;
-
 export const WordsPassed = styled.Text`
-  font-size: 16px;
+  font-size: 18px;
   font-weight: bold;
   margin-top: 30px;
   margin-bottom: 20px;
-  color: #fff;
+  color: #e3f2fd;
 `;
 export const Input = styled.TextInput`
   width: 100%;
@@ -47,11 +46,11 @@ export const StyledButton = styled.TouchableOpacity`
   padding: 12px;
   margin-bottom: 10px;
   border-radius: 8px;
-  background-color: rgb(26, 92, 179);
+  background-color: #1976d2;
   align-items: center;
-  shadow-color: rgb(96, 141, 238);
-  shadow-opacity: 0.2;
-  shadow-radius: 4px;
+  shadow-color: #64b5f6;
+  shadow-opacity: 0.5;
+  shadow-radius: 6px;
   elevation: 10;
 `;
 
