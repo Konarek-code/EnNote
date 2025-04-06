@@ -1,5 +1,13 @@
 import styled from "styled-components/native";
 
+interface WordCardProps {
+  isIncorrect?: boolean;
+}
+
+interface WordTextProps {
+  isIncorrect?: boolean;
+}
+
 export const Container = styled.View`
   flex: 1;
   background-color: #1e293b;
@@ -49,23 +57,24 @@ export const LevelText = styled.Text`
   font-weight: bold;
 `;
 
-export const WordCard = styled.View`
-  background-color: #3b82f6;
+export const WordCard = styled.View<WordCardProps>`
+  background-color: ${(props: WordCardProps) =>
+    props.isIncorrect ? "#fee2e2" : "#3b82f6"};
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 10px;
   flex-direction: row;
   justify-content: space-between;
 `;
-
-export const Word = styled.Text`
+export const Word = styled.Text<WordTextProps>`
   font-size: 18px;
   font-weight: bold;
-  color: white;
+  color: ${(props: WordTextProps) => (props.isIncorrect ? "#b91c1c" : "white")};
 `;
 
-export const Translation = styled.Text`
+export const Translation = styled.Text<WordTextProps>`
   margin-left: 10px;
   font-size: 16px;
-  color: #d1d5db;
+  color: ${(props: WordTextProps) =>
+    props.isIncorrect ? "#b91c1c" : "#d1d5db"};
 `;

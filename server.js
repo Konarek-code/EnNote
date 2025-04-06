@@ -15,7 +15,6 @@ app.use(express.json());
 const correctWordsFilePath = path.join(process.cwd(), "correctWords.json");
 const incorrectWordsFilePath = path.join(process.cwd(), "incorrectWords.json");
 const wordsFilePath = path.join(process.cwd(), "words.json");
-const counterFilePath = path.join(process.cwd(), "counter.json");
 
 // Funkcja do zapisu słowa w pliku JSON
 const saveWordToFile = (filePath, word, translations) => {
@@ -101,7 +100,6 @@ app.post("/save-correct-word", async (req, res) => {
   res.send("Correct word saved.");
 });
 
-// Endpoint do zapisywania błędnych słów
 app.post("/save-incorrect-word", async (req, res) => {
   const { word, translations } = req.body;
   if (!word) {
@@ -111,7 +109,6 @@ app.post("/save-incorrect-word", async (req, res) => {
   res.send("Incorrect word saved.");
 });
 
-// Endpoint do pobierania słów do testu
 app.get("/get-words", (req, res) => {
   fs.readFile(wordsFilePath, "utf8", (err, data) => {
     if (err) {
@@ -137,6 +134,16 @@ app.delete("/clear-words", (req, res) => {
 
 app.get("/get-correct-words", (req, res) => {
   fs.readFile(correctWordsFilePath, "utf8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ message: "Error reading file" });
+    }
+
+    const words = data ? JSON.parse(data) : [];
+    res.status(200).json(words);
+  });
+});
+app.get("/get-incorrect-words", (req, res) => {
+  fs.readFile(incorrectWordsFilePath, "utf8", (err, data) => {
     if (err) {
       return res.status(500).json({ message: "Error reading file" });
     }

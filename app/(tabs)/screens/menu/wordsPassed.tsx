@@ -27,7 +27,42 @@ const WordsPage = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [wordsData, setWordsData] = useState<Word[]>([]);
   const [selectedLevel, setSelectedLevel] = useState("To learn");
+  const [correctWords, setCorrectWords] = useState([]);
+  const [incorrectWords, setIncorrectWords] = useState([]);
 
+  const fetchCorrectWords = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-305143166666.europe-west1.run.app/get-correct-words"
+      );
+      const data = await response.json();
+      const correctWordsWithLevels = data.map((word: any, index: number) => ({
+        id: word.id || word.word,
+        word: word.word || "Brak danych",
+        translation: word.translations || "Brak tłumaczenia",
+        level: "Good with",
+      }));
+      setCorrectWords(correctWordsWithLevels);
+    } catch (error) {}
+  };
+  const fetchIncorrectWords = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-305143166666.europe-west1.run.app/get-incorrect-words"
+      );
+      const data = await response.json();
+      const incorrectWordsWithLevels = data.map((word: any, index: number) => ({
+        id: word.id || word.word,
+        word: word.word || "no data",
+        translation: word.translations || "no translation",
+        level: "to learn",
+        source: "incorrect",
+      }));
+      setIncorrectWords(incorrectWordsWithLevels);
+    } catch (error) {
+      console.error("Error fetching incorrect words:", error);
+    }
+  };
   const fetchWords = async () => {
     try {
       setRefreshing(true);
@@ -53,15 +88,19 @@ const WordsPage = () => {
 
   useEffect(() => {
     fetchWords();
+    fetchCorrectWords();
+    fetchIncorrectWords();
   }, []);
 
   useFocusEffect(
     useCallback(() => {
       fetchWords();
+      fetchCorrectWords();
+      fetchIncorrectWords();
     }, [])
   );
-
-  const filteredWords = wordsData.filter(
+  const combinedWords = [...wordsData, ...correctWords];
+  const filteredWords = combinedWords.filter(
     (word) => word.level === selectedLevel
   );
 

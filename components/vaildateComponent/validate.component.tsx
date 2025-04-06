@@ -6,9 +6,9 @@ import {
   TextInputChangeEventData,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import WordInput from "../inputComponent/wordInput.component"; // dostosuj ścieżkę jeśli inna
 import {
   Container,
-  Input,
   StyledButton,
   Message,
   WordsPassed,
@@ -17,6 +17,7 @@ import {
 } from "./validate.style";
 import { useFonts } from "expo-font";
 import TranslationBar from "../translationBar/translationBar.component";
+import TestScreen from "../testScreen/testscreen";
 
 const WordValidator: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>("");
@@ -29,6 +30,17 @@ const WordValidator: React.FC = () => {
     { word: string; translations: string[] }[]
   >([]);
 
+  const [incorrectWords, setIncorrectWords] = useState<
+    { word: string; translations: string[] }[]
+  >([]);
+
+  const [correctWords, setCorrectWords] = useState<
+    { word: string; translations: string[] }[]
+  >([]);
+
+  const [answerFeedback, setAnswerFeedback] = useState<
+    "correct" | "incorrect" | null
+  >(null);
   const [isTestStarted, setIsTestStarted] = useState<boolean>(false);
   const [currentWordIndex, setCurrentWordIndex] = useState<number>(0);
   const [userAnswer, setUserAnswer] = useState<string>("");
@@ -81,13 +93,28 @@ const WordValidator: React.FC = () => {
     saveCounter(newCounter);
   };
 
+  const resetCounter = async () => {
+    try {
+      await AsyncStorage.removeItem("counter");
+      setCounter(0);
+      console.log("Counter reset to 0");
+    } catch (error) {
+      console.error("Error resetting counter:", error);
+    }
+  };
+
   useEffect(() => {
     fetchCounter();
   }, []);
 
   const handleInputChange = (text: string) => {
-    setInputValue(text);
-    setValidationMessage(null);
+    const onlyLetters = text.replace(/[^a-zA-Z]/g, "");
+    if (onlyLetters !== text) {
+      setInputValue(onlyLetters);
+    } else {
+      setInputValue(text);
+      setValidationMessage(null);
+    }
   };
 
   const validateWord = async () => {
@@ -108,38 +135,48 @@ const WordValidator: React.FC = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            text: inputValue.trim(),
+            text: inputValue.trim().toLocaleLowerCase(),
+            source_lang: "EN",
             target_lang: "PL",
           }),
         }
       );
 
       if (response.ok) {
+        const rawInput = inputValue.trim().toLowerCase();
         const data = await response.json();
         const translations = data.translations.map(
           (translation: any) => translation.text
         );
-        setCurrentTranslation(translations[0]);
-        setIsValid(true);
+        if (
+          translations.length === 0 ||
+          translations[0].toLowerCase() === rawInput
+        ) {
+          setValidationMessage(`"${rawInput}" is not a valid English word.`);
+          setIsValid(false);
+        } else {
+          setCurrentTranslation(translations[0]);
+          setIsValid(true);
 
-        setWords((prevWords) => [
-          ...prevWords,
-          { word: inputValue.trim(), translations },
-        ]);
-        await fetch(
-          "https://backend-305143166666.europe-west1.run.app/save-word",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              word: inputValue.trim(),
-              translations: translations.join(", "),
-            }),
-          }
-        );
-        incrementCounter();
+          setWords((prevWords) => [
+            ...prevWords,
+            { word: inputValue.trim(), translations },
+          ]);
+          await fetch(
+            "https://backend-305143166666.europe-west1.run.app/save-word",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                word: inputValue.trim(),
+                translations: translations.join(", "),
+              }),
+            }
+          );
+          incrementCounter();
+        }
       } else {
         setValidationMessage(`The word "${inputValue.trim()}" is invalid.`);
         setIsValid(false);
@@ -173,18 +210,13 @@ const WordValidator: React.FC = () => {
     setIsTestStarted(true);
     setCurrentWordIndex(0);
     setScore(0);
-  };
-
-  const handleAnswerChange = (
-    e: NativeSyntheticEvent<TextInputChangeEventData>
-  ) => {
-    setUserAnswer(e.nativeEvent.text);
+    resetCounter();
   };
 
   const checkAnswer = async () => {
     const correctAnswer = words[currentWordIndex]?.translations;
     const trimmedUserAnswer = userAnswer.trim();
-
+    let isCorrect = false;
     if (
       correctAnswer &&
       correctAnswer.some(
@@ -192,7 +224,19 @@ const WordValidator: React.FC = () => {
           translation.toLowerCase() === trimmedUserAnswer.toLowerCase()
       )
     ) {
+      isCorrect = true;
+      setAnswerFeedback("correct");
       try {
+        const correctWord = {
+          word: words[currentWordIndex].word,
+          translations: correctAnswer,
+        };
+
+        setCorrectWords((prev: { word: string; translations: string[] }[]) => [
+          ...prev,
+          correctWord,
+        ]);
+
         await fetch(
           "https://backend-305143166666.europe-west1.run.app/save-correct-word",
           {
@@ -200,10 +244,7 @@ const WordValidator: React.FC = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              word: words[currentWordIndex].word,
-              translations: correctAnswer.join(", "),
-            }),
+            body: JSON.stringify(correctWord),
           }
         );
         alert("Correct answer added to the list");
@@ -213,7 +254,15 @@ const WordValidator: React.FC = () => {
       }
       setScore((prevScore) => prevScore + 1);
     } else {
+      isCorrect = false;
+      setAnswerFeedback("incorrect");
       try {
+        const incorrectWord = {
+          word: words[currentWordIndex].word,
+          translations: correctAnswer || [],
+        };
+
+        setIncorrectWords((prev) => [...prev, incorrectWord]);
         await fetch(
           "https://backend-305143166666.europe-west1.run.app/save-incorrect-word",
           {
@@ -221,10 +270,7 @@ const WordValidator: React.FC = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              word: words[currentWordIndex].word,
-              translations: correctAnswer.join(", "),
-            }),
+            body: JSON.stringify(incorrectWord),
           }
         );
         alert("Incorrect answer added to the list");
@@ -234,13 +280,20 @@ const WordValidator: React.FC = () => {
       }
     }
 
-    const nextIndex = currentWordIndex + 1;
-    if (nextIndex < words.length) {
-      setCurrentWordIndex(nextIndex);
-      setUserAnswer("");
-    } else {
-      alert(`Test finished! Your score: ${score + 1}/${words.length}`);
-    }
+    setTimeout(() => {
+      setAnswerFeedback(null);
+      const nextIndex = currentWordIndex + 1;
+      if (nextIndex < words.length) {
+        setCurrentWordIndex(nextIndex);
+        setUserAnswer("");
+      } else {
+        alert(
+          `Test finished! Your score: ${score + (isCorrect ? 1 : 0)}/${
+            words.length
+          }`
+        );
+      }
+    }, 1000);
   };
 
   const startNewTest = () => {
@@ -248,62 +301,68 @@ const WordValidator: React.FC = () => {
     setCurrentWordIndex(0);
     clearWords();
     setScore(0);
-    setCounter(0); // Reset licznika, jeśli trzeba
-    setWords([]); // Reset listy słów
-    setUserAnswer(""); // Reset odpowiedzi użytkownika
+    setCounter(0);
+    setWords([]);
+    setUserAnswer("");
   };
   return (
-    <Container>
-      <Text
-        style={{
-          fontFamily: "IrishGrover-Regular",
-          fontSize: 36,
-          color: "#fff",
-          textAlign: "center",
-          marginBottom: 0,
-        }}
-      >
-        EnNote
-      </Text>
-      <StyledImage source={require("../../assets/images/Iconpage.png")} />
-      <WordsPassed>Words Passed: {counter}/10</WordsPassed>
+    <>
       {!isTestStarted ? (
-        <>
-          <Input
-            value={inputValue}
-            onChangeText={handleInputChange}
-            placeholder="Type a word"
-          />
-          <StyledButton onPress={validateWord} disabled={isLoading}>
-            <ButtonText>{isLoading ? "Validating..." : "Validate"}</ButtonText>
-          </StyledButton>
+        <Container>
+          <Text
+            style={{
+              fontFamily: "IrishGrover-Regular",
+              fontSize: 36,
+              color: "#fff",
+              textAlign: "center",
+              marginBottom: 0,
+            }}
+          >
+            EnNote
+          </Text>
+          <StyledImage source={require("../../assets/images/Iconpage.png")} />
+          <WordsPassed>Words Passed: {counter}/10</WordsPassed>
+
+          {counter < 10 && (
+            <>
+              <WordInput value={inputValue} onChangeText={handleInputChange} />
+              <StyledButton onPress={validateWord} disabled={isLoading}>
+                <ButtonText>
+                  {isLoading ? "Validating..." : "Validate"}
+                </ButtonText>
+              </StyledButton>
+            </>
+          )}
           {validationMessage && (
-            <Message isValid={isValid}>{validationMessage}</Message>
+            <>
+              <Message isValid={isValid}>{validationMessage}</Message>
+              {counter >= 10 &&
+                alert(
+                  "You have reached the maximum number of words. Please start the test."
+                )}
+            </>
           )}
           {counter >= 10 && (
-            <StyledButton title="Start Test" onPress={startTest} />
+            <StyledButton onPress={startTest}>
+              <ButtonText>Start Test</ButtonText>
+            </StyledButton>
           )}
           <TranslationBar translation={currentTranslation} />
-        </>
+        </Container>
       ) : (
-        <View style={{ padding: 20 }}>
-          <Text>Test</Text>
-          <Text style={{ marginVertical: 10 }}>
-            Question {currentWordIndex + 1}/{words.length}
-          </Text>
-          <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-            {words[currentWordIndex]?.word}
-          </Text>
-          <Input
-            value={userAnswer}
-            onChangeText={setUserAnswer}
-            placeholder="Your answer"
+        <>
+          <TestScreen
+            words={words}
+            currentIndex={currentWordIndex}
+            userAnswer={userAnswer}
+            onAnswerChange={setUserAnswer}
+            onCheckAnswer={checkAnswer}
+            onEndTest={startNewTest}
+            answerFeedback={answerFeedback}
           />
-          <StyledButton title="Check Answer" onPress={() => {}} />
-          <StyledButton title="Start New Test" onPress={startNewTest} />
-        </View>
+        </>
       )}
-    </Container>
+    </>
   );
 };
 
