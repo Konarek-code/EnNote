@@ -8,8 +8,8 @@ export const Container = styled.View`
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  overflow: hidden;
-  margin-bottom: 100px;
+  overflow: auto;
+  margin-bottom: 50px;
 `;
 export const StyledImage = styled.Image`
   width: 100px;
@@ -23,7 +23,7 @@ export const Title = styled.Text`
   font-family: "IrishGrover-Regular";
   font-weight: bold;
   margin-bottom: 10px;
-  color: #bbdefb;
+  color: rgb(233, 233, 233);
 `;
 export const WordsPassed = styled.Text`
   font-size: 18px;
@@ -31,14 +31,6 @@ export const WordsPassed = styled.Text`
   margin-top: 30px;
   margin-bottom: 20px;
   color: #e3f2fd;
-`;
-export const Input = styled.TextInput`
-  width: 100%;
-  border: 1px solid #ccc;
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: 5px;
-  background-color: white;
 `;
 
 export const StyledButton = styled.TouchableOpacity`
