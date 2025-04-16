@@ -59,7 +59,7 @@ export const LevelText = styled.Text`
 
 export const WordCard = styled.View<WordCardProps>`
   background-color: ${(props: WordCardProps) =>
-    props.isIncorrect ? "#fee2e2" : "#3b82f6"};
+    props.isIncorrect ? "rgb(255, 136, 67)" : "#3b82f6"};
   padding: 15px;
   border-radius: 10px;
   margin-bottom: 10px;
@@ -69,12 +69,13 @@ export const WordCard = styled.View<WordCardProps>`
 export const Word = styled.Text<WordTextProps>`
   font-size: 18px;
   font-weight: bold;
-  color: ${(props: WordTextProps) => (props.isIncorrect ? "#b91c1c" : "white")};
+  color: ${(props: WordTextProps) =>
+    props.isIncorrect ? "rgb(255, 255, 255)" : "white"};
 `;
 
 export const Translation = styled.Text<WordTextProps>`
   margin-left: 10px;
   font-size: 16px;
   color: ${(props: WordTextProps) =>
-    props.isIncorrect ? "#b91c1c" : "#d1d5db"};
+    props.isIncorrect ? "rgba(245, 245, 245, 0.98)" : "#d1d5db"};
 `;

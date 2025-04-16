@@ -1,22 +1,24 @@
-FROM node:14
+# Start from Node.js base image
+FROM node:18
 
-# Ustawienie katalogu roboczego
+# Working directory
 WORKDIR /app
 
-# Kopiowanie plików package.json i package-lock.json, aby zainstalować zależności
+# Copy package info and install
 COPY package.json package-lock.json ./
-
-# Instalacja zależności
 RUN npm install
 
-# Kopiowanie pozostałych plików aplikacji
+# Copy app files
 COPY . .
 
-# Ustalenie zmiennej środowiskowej PORT
-ENV PORT=8080
+# Copy .env file
+COPY .env .env
 
-# Wystawienie portu (dopasuj do aplikacji)
+# Copy Firebase credentials
+COPY utils/serviceAccountKey.json ./utils/serviceAccountKey.json
+
+# Expose Cloud Run port
 EXPOSE 8080
 
-# Uruchomienie aplikacji
+# Start app
 CMD ["node", "server.js"]

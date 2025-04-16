@@ -13,10 +13,11 @@ import {
 } from "./upTimers.style";
 import { BackButton } from "./wordsPassed.style";
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { useRouter } from "expo-router";
 import { TouchableOpacity } from "react-native";
 
 const UpcomingTimers = () => {
+  const router = useRouter();
   return (
     <Container>
       <BackButton
@@ -27,6 +28,7 @@ const UpcomingTimers = () => {
       </BackButton>
       <Title>Upcoming Tests</Title>
       <Brake />
+
       <TestSection>
         <TestTitle>Weekly Test</TestTitle>
         <CountdownCircleTimer
@@ -47,12 +49,15 @@ const UpcomingTimers = () => {
           <ActionButton secondary>
             <ButtonText>Need more time</ButtonText>
           </ActionButton>
-          <ActionButton>
+          <ActionButton
+            onPress={() => router.push("/(tabs)/screens/menu/weeklyTest")} // Navigate to the weekly test screen
+          >
             <ButtonText>Start now</ButtonText>
           </ActionButton>
         </ButtonRow>
       </TestSection>
 
+      {/* Monthly Test Section */}
       <TestSection>
         <TestTitle>Monthly Test</TestTitle>
         <CountdownCircleTimer
@@ -73,7 +78,9 @@ const UpcomingTimers = () => {
           <ActionButton secondary>
             <ButtonText>Need more time</ButtonText>
           </ActionButton>
-          <ActionButton>
+          <ActionButton
+            onPress={() => router.push("/(tabs)/screens/menu/monthlyTest")} // Navigate to the monthly test screen
+          >
             <ButtonText>Start now</ButtonText>
           </ActionButton>
         </ButtonRow>

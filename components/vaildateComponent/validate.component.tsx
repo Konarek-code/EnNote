@@ -18,6 +18,7 @@ import {
 import { useFonts } from "expo-font";
 import TranslationBar from "../translationBar/translationBar.component";
 import TestScreen from "../testScreen/testscreen";
+import { router } from "expo-router";
 
 const WordValidator: React.FC = () => {
   const [inputValue, setInputValue] = useState<string>("");
@@ -49,6 +50,7 @@ const WordValidator: React.FC = () => {
   const [currentTranslation, setCurrentTranslation] = useState<string | null>(
     null
   );
+  const [accuracy, setAccuracy] = useState<number | null>(null);
 
   let [fontsLoaded] = useFonts({
     "IrishGrover-Regular": require("../../assets/fonts/IrishGrover-Regular.ttf"),
@@ -57,7 +59,7 @@ const WordValidator: React.FC = () => {
   useEffect(() => {
     const fetchWords = async () => {
       const response = await fetch(
-        "https://backend-305143166666.europe-west1.run.app/get-words"
+        "https://backend-305143166666.europe-central2.run.app/get-words"
       );
       const data = await response.json();
       setWords(data);
@@ -123,12 +125,26 @@ const WordValidator: React.FC = () => {
       setIsValid(false);
       return;
     }
+    const rawInput = inputValue.trim().toLowerCase();
 
+    const wordExists =
+      words.some((word) => word.word.toLowerCase() === rawInput) ||
+      incorrectWords.some((word) => word.word.toLowerCase() === rawInput) ||
+      correctWords.some((word) => word.word.toLowerCase() === rawInput);
+
+    if (wordExists) {
+      setValidationMessage(`The word "${rawInput}" has already been added.`);
+      setIsValid(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setValidationMessage(null);
     setIsLoading(true);
     setValidationMessage(null);
     try {
       const response = await fetch(
-        `https://backend-305143166666.europe-west1.run.app/translate`,
+        `https://backend-305143166666.europe-central2.run.app/translate`,
         {
           method: "POST",
           headers: {
@@ -145,9 +161,10 @@ const WordValidator: React.FC = () => {
       if (response.ok) {
         const rawInput = inputValue.trim().toLowerCase();
         const data = await response.json();
-        const translations = data.translations.map(
-          (translation: any) => translation.text
-        );
+        const translations = Array.isArray(data.translations)
+          ? data.translations.map((translation: any) => translation.text)
+          : [];
+
         if (
           translations.length === 0 ||
           translations[0].toLowerCase() === rawInput
@@ -163,7 +180,7 @@ const WordValidator: React.FC = () => {
             { word: inputValue.trim(), translations },
           ]);
           await fetch(
-            "https://backend-305143166666.europe-west1.run.app/save-word",
+            "https://backend-305143166666.europe-central2.run.app/save-word",
             {
               method: "POST",
               headers: {
@@ -190,10 +207,11 @@ const WordValidator: React.FC = () => {
       setInputValue("");
     }
   };
+
   const clearWords = async () => {
     try {
       await fetch(
-        "https://backend-305143166666.europe-west1.run.app/clear-words",
+        "https://backend-305143166666.europe-central2.run.app/clear-words",
         {
           method: "DELETE",
         }
@@ -238,7 +256,7 @@ const WordValidator: React.FC = () => {
         ]);
 
         await fetch(
-          "https://backend-305143166666.europe-west1.run.app/save-correct-word",
+          "https://backend-305143166666.europe-central2.run.app/save-correct-word",
           {
             method: "POST",
             headers: {
@@ -264,7 +282,7 @@ const WordValidator: React.FC = () => {
 
         setIncorrectWords((prev) => [...prev, incorrectWord]);
         await fetch(
-          "https://backend-305143166666.europe-west1.run.app/save-incorrect-word",
+          "https://backend-305143166666.europe-central2.run.app/save-incorrect-word",
           {
             method: "POST",
             headers: {
@@ -287,11 +305,17 @@ const WordValidator: React.FC = () => {
         setCurrentWordIndex(nextIndex);
         setUserAnswer("");
       } else {
+        const accuracy = ((score + (isCorrect ? 1 : 0)) / words.length) * 100;
+        setAccuracy(accuracy);
         alert(
           `Test finished! Your score: ${score + (isCorrect ? 1 : 0)}/${
             words.length
           }`
         );
+        router.push({
+          pathname: "/(tabs)/screens/menu/stats",
+          params: { score, total: words.length },
+        });
       }
     }, 1000);
   };
@@ -350,17 +374,15 @@ const WordValidator: React.FC = () => {
           <TranslationBar translation={currentTranslation} />
         </Container>
       ) : (
-        <>
-          <TestScreen
-            words={words}
-            currentIndex={currentWordIndex}
-            userAnswer={userAnswer}
-            onAnswerChange={setUserAnswer}
-            onCheckAnswer={checkAnswer}
-            onEndTest={startNewTest}
-            answerFeedback={answerFeedback}
-          />
-        </>
+        <TestScreen
+          words={words}
+          currentIndex={currentWordIndex}
+          userAnswer={userAnswer}
+          onAnswerChange={setUserAnswer}
+          onCheckAnswer={checkAnswer}
+          onEndTest={startNewTest}
+          answerFeedback={answerFeedback}
+        />
       )}
     </>
   );
