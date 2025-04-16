@@ -22,6 +22,7 @@ const WordsPage = () => {
     word: string;
     translation: string;
     level: string;
+    source?: string;
   }
 
   const [refreshing, setRefreshing] = useState(false);
@@ -29,11 +30,12 @@ const WordsPage = () => {
   const [selectedLevel, setSelectedLevel] = useState("To learn");
   const [correctWords, setCorrectWords] = useState([]);
   const [incorrectWords, setIncorrectWords] = useState([]);
+  const [expertWords, setExpertWords] = useState([]);
 
   const fetchCorrectWords = async () => {
     try {
       const response = await fetch(
-        "https://backend-305143166666.europe-west1.run.app/get-correct-words"
+        "https://backend-305143166666.europe-central2.run.app/get-correct-words"
       );
       const data = await response.json();
       const correctWordsWithLevels = data.map((word: any, index: number) => ({
@@ -45,17 +47,34 @@ const WordsPage = () => {
       setCorrectWords(correctWordsWithLevels);
     } catch (error) {}
   };
+  const fetchExpertWords = async () => {
+    try {
+      const response = await fetch(
+        "https://backend-305143166666.europe-central2.run.app/expertWords"
+      );
+      const data = await response.json();
+      const expertWordsWithLevels = data.map((word: any, index: number) => ({
+        id: word.id || word.word,
+        word: word.word || "no data",
+        translation: word.translations || "no translation",
+        level: "Expert",
+      }));
+      setExpertWords(expertWordsWithLevels);
+    } catch (error) {
+      console.error("Error fetching expert words:", error);
+    }
+  };
   const fetchIncorrectWords = async () => {
     try {
       const response = await fetch(
-        "https://backend-305143166666.europe-west1.run.app/get-incorrect-words"
+        "https://backend-305143166666.europe-central2.run.app/get-incorrect-words"
       );
       const data = await response.json();
       const incorrectWordsWithLevels = data.map((word: any, index: number) => ({
         id: word.id || word.word,
         word: word.word || "no data",
         translation: word.translations || "no translation",
-        level: "to learn",
+        level: "To learn",
         source: "incorrect",
       }));
       setIncorrectWords(incorrectWordsWithLevels);
@@ -67,7 +86,7 @@ const WordsPage = () => {
     try {
       setRefreshing(true);
       const response = await fetch(
-        "https://backend-305143166666.europe-west1.run.app/get-words"
+        "https://backend-305143166666.europe-central2.run.app/get-words"
       );
       const data = await response.json();
 
@@ -90,6 +109,7 @@ const WordsPage = () => {
     fetchWords();
     fetchCorrectWords();
     fetchIncorrectWords();
+    fetchExpertWords();
   }, []);
 
   useFocusEffect(
@@ -97,9 +117,15 @@ const WordsPage = () => {
       fetchWords();
       fetchCorrectWords();
       fetchIncorrectWords();
+      fetchExpertWords();
     }, [])
   );
-  const combinedWords = [...wordsData, ...correctWords];
+  const combinedWords = [
+    ...wordsData,
+    ...correctWords,
+    ...incorrectWords,
+    ...expertWords,
+  ];
   const filteredWords = combinedWords.filter(
     (word) => word.level === selectedLevel
   );
@@ -134,12 +160,18 @@ const WordsPage = () => {
       <FlatList
         data={filteredWords}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <WordCard>
-            <Word>{item.word}</Word>
-            <Translation>{item.translation}</Translation>
-          </WordCard>
-        )}
+        renderItem={({ item }) => {
+          const isIncorrect =
+            item.level === "To learn" && item.source === "incorrect";
+          return (
+            <WordCard isIncorrect={isIncorrect}>
+              <Word isIncorrect={isIncorrect}>{item.word}</Word>
+              <Translation isIncorrect={isIncorrect}>
+                {item.translation}
+              </Translation>
+            </WordCard>
+          );
+        }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={fetchWords} />
         }

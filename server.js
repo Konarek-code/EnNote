@@ -1,9 +1,8 @@
 import express from "express";
 import cors from "cors";
-import fs from "fs";
 import dotenv from "dotenv";
-import path from "path";
 import fetch from "node-fetch";
+import { db } from "./utils/firebase.js";
 
 dotenv.config();
 const app = express();
@@ -12,36 +11,12 @@ const port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-const correctWordsFilePath = path.join(process.cwd(), "correctWords.json");
-const incorrectWordsFilePath = path.join(process.cwd(), "incorrectWords.json");
-const wordsFilePath = path.join(process.cwd(), "words.json");
+const saveWordToFirestore = async (collectionName, word, translations) => {
+  if (!word || !translations) {
+    throw new Error("Word and translation are required.");
+  }
 
-// Funkcja do zapisu słowa w pliku JSON
-const saveWordToFile = (filePath, word, translations) => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, "utf8", (err, data) => {
-      const words = err || !data ? [] : JSON.parse(data);
-
-      if (!word || !translations) {
-        reject(new Error("Word and translation are required."));
-        return;
-      }
-      const existingWordIndex = words.findIndex((entry) => entry.word === word);
-      if (existingWordIndex === -1) {
-        words.push({ word, translations });
-      } else {
-        // Jeśli słowo już istnieje, zaktualizuj tłumaczenia
-        words[existingWordIndex].translations = translations;
-      }
-      fs.writeFile(filePath, JSON.stringify(words, null, 2), (err) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve("Word saved successfully.");
-        }
-      });
-    });
-  });
+  await db.collection(collectionName).doc(word).set({ translations });
 };
 
 app.post("/translate", async (req, res) => {
@@ -72,8 +47,18 @@ app.post("/translate", async (req, res) => {
   }
 });
 
-// Endpoint do zapisywania słów w pliku JSON
-app.post("/save-word", (req, res) => {
+const checkIfWordExists = async (word) => {
+  const collections = ["words", "correctWords", "incorrectWords"];
+
+  for (const collection of collections) {
+    const doc = await db.collection(collection).doc(word).get();
+    if (doc.exists) return true;
+  }
+
+  return false;
+};
+
+app.post("/save-word", async (req, res) => {
   const { word, translations } = req.body;
 
   if (!word || !translations) {
@@ -82,75 +67,205 @@ app.post("/save-word", (req, res) => {
       .json({ message: "Word and translation are required." });
   }
 
-  saveWordToFile(wordsFilePath, word, translations)
-    .then((message) => res.status(200).json({ message }))
-    .catch((error) => {
-      console.error("Error saving word:", error);
-      res.status(500).json({ message: "Error saving word" });
-    });
+  try {
+    const wordExists = await checkIfWordExists(word);
+    if (wordExists) {
+      return res
+        .status(400)
+        .json({ message: `"${word}" already exists in the database.` });
+    }
+
+    await saveWordToFirestore("words", word, translations);
+    res.status(200).json({ message: `"${word}" has been successfully added.` });
+  } catch (error) {
+    console.error("Error saving word:", error);
+    res.status(500).json({ message: "Error saving word" });
+  }
 });
 
-// Endpoint do zapisywania poprawnych słów
 app.post("/save-correct-word", async (req, res) => {
   const { word, translations } = req.body;
+
   if (!word) {
     return res.status(400).send("No word provided.");
   }
-  saveWordToFile(correctWordsFilePath, word, translations);
-  res.send("Correct word saved.");
+
+  try {
+    await saveWordToFirestore("correctWords", word, translations);
+    res.send("Correct word saved.");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error saving correct word.");
+  }
 });
 
 app.post("/save-incorrect-word", async (req, res) => {
   const { word, translations } = req.body;
+
   if (!word) {
     return res.status(400).send("No word provided.");
   }
-  saveWordToFile(incorrectWordsFilePath, word, translations);
-  res.send("Incorrect word saved.");
+
+  try {
+    await saveWordToFirestore("incorrectWords", word, translations);
+    res.send("Incorrect word saved.");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error saving incorrect word.");
+  }
 });
 
-app.get("/get-words", (req, res) => {
-  fs.readFile(wordsFilePath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ message: "Error reading file" });
-    }
-
-    const words = data ? JSON.parse(data) : [];
+app.get("/get-words", async (req, res) => {
+  try {
+    const snapshot = await db.collection("words").get();
+    const words = snapshot.docs.map((doc) => ({
+      word: doc.id,
+      translations: doc.data().translations,
+    }));
     res.status(200).json(words);
-  });
+  } catch (error) {
+    console.error("Error getting words:", error);
+    res.status(500).json({ message: "Error getting words" });
+  }
 });
 
-// Endpoint do czyszczenia słów w pliku
-app.delete("/clear-words", (req, res) => {
-  fs.writeFile(wordsFilePath, JSON.stringify([], null, 2), (err) => {
-    if (err) {
-      console.error("Error clearing file:", err);
-      return res.status(500).json({ message: "Error clearing file" });
-    }
+app.delete("/clear-words", async (req, res) => {
+  try {
+    const snapshot = await db.collection("words").get();
 
-    res.status(200).json({ message: "Words cleared successfully!" });
-  });
+    const batch = db.batch();
+    snapshot.docs.forEach((doc) => {
+      batch.delete(doc.ref);
+    });
+
+    await batch.commit();
+    res
+      .status(200)
+      .json({ message: "Words cleared successfully from Firebase!" });
+  } catch (error) {
+    console.error("Error clearing words:", error);
+    res.status(500).json({ message: "Error clearing words" });
+  }
 });
 
-app.get("/get-correct-words", (req, res) => {
-  fs.readFile(correctWordsFilePath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ message: "Error reading file" });
-    }
-
-    const words = data ? JSON.parse(data) : [];
+app.get("/get-correct-words", async (req, res) => {
+  try {
+    const snapshot = await db.collection("correctWords").get();
+    const words = snapshot.docs.map((doc) => ({
+      word: doc.id,
+      translations: doc.data().translations,
+    }));
     res.status(200).json(words);
-  });
+  } catch (error) {
+    console.error("Error getting correct words:", error);
+    res.status(500).json({ message: "Error getting correct words" });
+  }
 });
-app.get("/get-incorrect-words", (req, res) => {
-  fs.readFile(incorrectWordsFilePath, "utf8", (err, data) => {
-    if (err) {
-      return res.status(500).json({ message: "Error reading file" });
+
+app.get("/get-incorrect-words", async (req, res) => {
+  try {
+    const snapshot = await db.collection("incorrectWords").get();
+    const words = snapshot.docs.map((doc) => ({
+      word: doc.id,
+      translations: doc.data().translations,
+    }));
+    res.status(200).json(words);
+  } catch (error) {
+    console.error("Error getting incorrect words:", error);
+    res.status(500).json({ message: "Error getting incorrect words" });
+  }
+});
+
+app.patch("/promote-word", async (req, res) => {
+  const { word, fromCollection } = req.body;
+
+  if (!word || !fromCollection) {
+    return res
+      .status(400)
+      .json({ message: "Word and fromCollection are required." });
+  }
+
+  const promotionMap = {
+    incorrectWords: "correctWords",
+    correctWords: "expertWords",
+  };
+
+  const toCollection = promotionMap[fromCollection];
+  if (!toCollection) {
+    return res
+      .status(400)
+      .json({ message: `Cannot promote from ${fromCollection}.` });
+  }
+
+  try {
+    const docRef = db.collection(fromCollection).doc(word);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return res
+        .status(404)
+        .json({ message: `"${word}" not found in ${fromCollection}` });
     }
 
-    const words = data ? JSON.parse(data) : [];
+    const data = doc.data();
+
+    await db.collection(toCollection).doc(word).set(data);
+    await docRef.delete();
+
+    res.status(200).json({ message: `"${word}" promoted to ${toCollection}.` });
+  } catch (error) {
+    console.error("Error promoting word:", error);
+    res.status(500).json({ message: "Error promoting word" });
+  }
+});
+app.get("/get-weekly-words", async (req, res) => {
+  const collections = ["incorrectWords", "correctWords"];
+  const allWords = [];
+
+  try {
+    for (const collection of collections) {
+      const snapshot = await db.collection(collection).get();
+      const words = snapshot.docs.map((doc) => ({
+        word: doc.id,
+        translations: doc.data().translations,
+        level: collection,
+      }));
+
+      allWords.push(...words);
+    }
+
+    res.status(200).json(allWords);
+  } catch (error) {
+    console.error("Error getting weekly words:", error);
+    res.status(500).json({ message: "Error getting weekly words" });
+  }
+});
+
+app.get("/get-monthly-words", async (req, res) => {
+  try {
+    const snapshot = await db.collection("expertWords").get();
+    const words = snapshot.docs.map((doc) => ({
+      word: doc.id,
+      translations: doc.data().translations,
+    }));
     res.status(200).json(words);
-  });
+  } catch (error) {
+    console.error("Error getting monthly words:", error);
+    res.status(500).json({ message: "Error getting monthly words" });
+  }
+});
+app.get("/expertWords", async (req, res) => {
+  try {
+    const snapshot = await db.collection("expertWords").get();
+    const words = snapshot.docs.map((doc) => ({
+      word: doc.id,
+      translations: doc.data().translations,
+    }));
+    res.status(200).json(words);
+  } catch (error) {
+    console.error("Error getting expert words:", error);
+    res.status(500).json({ message: "Error getting expert words" });
+  }
 });
 
 // Uruchomienie serwera
