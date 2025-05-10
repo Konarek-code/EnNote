@@ -1,12 +1,9 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  NativeSyntheticEvent,
-  TextInputChangeEventData,
-} from "react-native";
+import { Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import WordInput from "../inputComponent/wordInput.component"; // dostosuj ścieżkę jeśli inna
+import WordInput from "../inputComponent/wordInput.component";
+import { useDispatch } from "react-redux";
+import { setTestResult } from "@/store/testResult.slicer";
 import {
   Container,
   StyledButton,
@@ -18,9 +15,11 @@ import {
 import { useFonts } from "expo-font";
 import TranslationBar from "../translationBar/translationBar.component";
 import TestScreen from "../testScreen/testscreen";
+import { saveTestResult } from "@/utils/testHistory";
 import { router } from "expo-router";
 
 const WordValidator: React.FC = () => {
+  const dispatch = useDispatch();
   const [inputValue, setInputValue] = useState<string>("");
   const [validationMessage, setValidationMessage] = useState<string | null>(
     null
@@ -230,6 +229,36 @@ const WordValidator: React.FC = () => {
     setScore(0);
     resetCounter();
   };
+  const handleTimeout = async (isCorrect: boolean) => {
+    setAnswerFeedback(null);
+    const nextIndex = currentWordIndex + 1;
+
+    if (nextIndex < words.length) {
+      setCurrentWordIndex(nextIndex);
+      setUserAnswer("");
+    } else {
+      const finalScore = score + (isCorrect ? 1 : 0);
+      const accuracy = (finalScore / words.length) * 100;
+      const totalWords = words.length;
+      const result = {
+        date: new Date().toISOString().split("T")[0],
+        score: finalScore,
+        total: words.length,
+        accuracy,
+      };
+
+      try {
+        await saveTestResult(result);
+        console.log("Saved result:", result);
+        setAccuracy(accuracy);
+        alert(`Test finished! Your score: ${finalScore}/${totalWords}`);
+        dispatch(setTestResult({ score: finalScore, total: totalWords }));
+      } catch (err) {
+        console.error("Error saving test result:", err);
+        alert("Something went wrong saving the result.");
+      }
+    }
+  };
 
   const checkAnswer = async () => {
     const correctAnswer = words[currentWordIndex]?.translations;
@@ -265,7 +294,6 @@ const WordValidator: React.FC = () => {
             body: JSON.stringify(correctWord),
           }
         );
-        alert("Correct answer added to the list");
       } catch (error) {
         console.error("Error saving correct word:", error);
         alert("Error adding correct word");
@@ -291,7 +319,6 @@ const WordValidator: React.FC = () => {
             body: JSON.stringify(incorrectWord),
           }
         );
-        alert("Incorrect answer added to the list");
       } catch (error) {
         console.error("Error saving incorrect word:", error);
         alert("Error adding incorrect word");
@@ -299,24 +326,7 @@ const WordValidator: React.FC = () => {
     }
 
     setTimeout(() => {
-      setAnswerFeedback(null);
-      const nextIndex = currentWordIndex + 1;
-      if (nextIndex < words.length) {
-        setCurrentWordIndex(nextIndex);
-        setUserAnswer("");
-      } else {
-        const accuracy = ((score + (isCorrect ? 1 : 0)) / words.length) * 100;
-        setAccuracy(accuracy);
-        alert(
-          `Test finished! Your score: ${score + (isCorrect ? 1 : 0)}/${
-            words.length
-          }`
-        );
-        router.push({
-          pathname: "/(tabs)/screens/menu/stats",
-          params: { score, total: words.length },
-        });
-      }
+      handleTimeout(isCorrect);
     }, 1000);
   };
 

@@ -15,28 +15,14 @@
       "supportsTablet": true
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "package": "com.damianoitaliano.EnNote"
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "icon": "./assets/images/page-icon.png"
+      "output": "static"
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
       "expo-font"
     ],
     "experiments": {
@@ -49,6 +35,7 @@
       "eas": {
         "projectId": "f7a748e8-554f-435e-a27c-e0ac3cca8be6"
       }
-    }
+    },
+    "owner": "damianoitaliano"
   }
 }

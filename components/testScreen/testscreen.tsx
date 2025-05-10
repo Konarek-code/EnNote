@@ -32,7 +32,9 @@ const TestScreen: React.FC<TestScreenProps> = ({
   return (
     <Container>
       <Title>Test</Title>
-      <QuestionText></QuestionText>
+      <QuestionText>
+        <Text></Text>
+      </QuestionText>
       {answerFeedback && (
         <View
           style={{
