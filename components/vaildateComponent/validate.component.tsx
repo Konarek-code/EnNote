@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import WordInput from "../inputComponent/wordInput.component";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setTestResult } from "@/store/testResult.slicer";
 import {
   Container,
@@ -16,7 +16,6 @@ import { useFonts } from "expo-font";
 import TranslationBar from "../translationBar/translationBar.component";
 import TestScreen from "../testScreen/testscreen";
 import { saveTestResult } from "@/utils/testHistory";
-import { router } from "expo-router";
 
 const WordValidator: React.FC = () => {
   const dispatch = useDispatch();
@@ -50,6 +49,7 @@ const WordValidator: React.FC = () => {
     null
   );
   const [accuracy, setAccuracy] = useState<number | null>(null);
+  const user = useSelector((state: any) => state.user);
 
   let [fontsLoaded] = useFonts({
     "IrishGrover-Regular": require("../../assets/fonts/IrishGrover-Regular.ttf"),
@@ -58,14 +58,14 @@ const WordValidator: React.FC = () => {
   useEffect(() => {
     const fetchWords = async () => {
       const response = await fetch(
-        "https://backend-305143166666.europe-central2.run.app/get-words"
+        `https://backend-305143166666.europe-central2.run.app/get-words?uid=${user?.uid}`
       );
       const data = await response.json();
       setWords(data);
     };
 
     fetchWords();
-  }, []);
+  }, [user.uid]);
 
   const fetchCounter = async () => {
     try {
@@ -186,6 +186,7 @@ const WordValidator: React.FC = () => {
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
+                uid: user.uid,
                 word: inputValue.trim(),
                 translations: translations.join(", "),
               }),
@@ -213,6 +214,12 @@ const WordValidator: React.FC = () => {
         "https://backend-305143166666.europe-central2.run.app/clear-words",
         {
           method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            uid: user.uid,
+          }),
         }
       );
       setWords([]);
@@ -275,6 +282,7 @@ const WordValidator: React.FC = () => {
       setAnswerFeedback("correct");
       try {
         const correctWord = {
+          uid: user.uid,
           word: words[currentWordIndex].word,
           translations: correctAnswer,
         };
@@ -304,6 +312,7 @@ const WordValidator: React.FC = () => {
       setAnswerFeedback("incorrect");
       try {
         const incorrectWord = {
+          uid: user.uid,
           word: words[currentWordIndex].word,
           translations: correctAnswer || [],
         };

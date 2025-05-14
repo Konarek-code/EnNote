@@ -84,3 +84,6 @@ export const BoldText = styled.Text`
   font-size: 16px;
   font-weight: bold;
 `;
+export const BackButton = styled.TouchableOpacity`
+  margin-bottom: 15px;
+`;
