@@ -14,7 +14,7 @@ export default () => {
         tabBarShowLabel: false,
       }}
     >
-      <Tabs.Screen name="menuPage.component" options={{}} />
+      <Tabs.Screen name="menu" options={{}} />
       <Tabs.Screen
         name="Home"
         options={{

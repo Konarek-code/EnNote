@@ -2,7 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
-import { db } from "./utils/firebase.js";
+import { db } from "./utils/firebaseAdmin.js";
+import { doc, getDoc } from "firebase/firestore";
 
 dotenv.config();
 const app = express();
@@ -11,12 +12,16 @@ const port = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-const saveWordToFirestore = async (collectionName, word, translations) => {
-  if (!word || !translations) {
-    throw new Error("Word and translation are required.");
+const saveWordToFirestore = async (uid, collectionName, word, translations) => {
+  if (!uid.trim() || !word.trim() || !translations) {
+    throw new Error("UID, word and translations are required.");
   }
 
-  await db.collection(collectionName).doc(word).set({ translations });
+  const wordRef = db.doc(`users/${uid}/${collectionName}/${word}`);
+
+  await wordRef.set({
+    translations,
+  });
 };
 
 app.post("/translate", async (req, res) => {
@@ -47,35 +52,36 @@ app.post("/translate", async (req, res) => {
   }
 });
 
-const checkIfWordExists = async (word) => {
+const checkIfWordExists = async (uid, word) => {
   const collections = ["words", "correctWords", "incorrectWords"];
 
   for (const collection of collections) {
-    const doc = await db.collection(collection).doc(word).get();
-    if (doc.exists) return true;
+    const docRef = db.doc(`users/${uid}/${collection}/${word}`);
+    const docSnap = await docRef.get();
+    if (docSnap.exists) return true;
   }
 
   return false;
 };
 
 app.post("/save-word", async (req, res) => {
-  const { word, translations } = req.body;
+  const { uid, word, translations } = req.body;
 
-  if (!word || !translations) {
-    return res
-      .status(400)
-      .json({ message: "Word and translation are required." });
+  if (!uid || !word || !translations) {
+    return res.status(400).json({
+      message: "User must be logged in. Word and translation are required.",
+    });
   }
 
   try {
-    const wordExists = await checkIfWordExists(word);
+    const wordExists = await checkIfWordExists(uid, word);
     if (wordExists) {
       return res
         .status(400)
         .json({ message: `"${word}" already exists in the database.` });
     }
 
-    await saveWordToFirestore("words", word, translations);
+    await saveWordToFirestore(uid, "words", word, translations);
     res.status(200).json({ message: `"${word}" has been successfully added.` });
   } catch (error) {
     console.error("Error saving word:", error);
@@ -84,14 +90,14 @@ app.post("/save-word", async (req, res) => {
 });
 
 app.post("/save-correct-word", async (req, res) => {
-  const { word, translations } = req.body;
+  const { uid, word, translations } = req.body;
 
-  if (!word) {
+  if (!uid || !word) {
     return res.status(400).send("No word provided.");
   }
 
   try {
-    await saveWordToFirestore("correctWords", word, translations);
+    await saveWordToFirestore(uid, "correctWords", word, translations);
     res.send("Correct word saved.");
   } catch (error) {
     console.error(error);
@@ -100,14 +106,14 @@ app.post("/save-correct-word", async (req, res) => {
 });
 
 app.post("/save-incorrect-word", async (req, res) => {
-  const { word, translations } = req.body;
+  const { uid, word, translations } = req.body;
 
-  if (!word) {
+  if (!uid || !word) {
     return res.status(400).send("No word provided.");
   }
 
   try {
-    await saveWordToFirestore("incorrectWords", word, translations);
+    await saveWordToFirestore(uid, "incorrectWords", word, translations);
     res.send("Incorrect word saved.");
   } catch (error) {
     console.error(error);
@@ -116,8 +122,16 @@ app.post("/save-incorrect-word", async (req, res) => {
 });
 
 app.get("/get-words", async (req, res) => {
+  const { uid } = req.query;
+  if (!uid) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
   try {
-    const snapshot = await db.collection("words").get();
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("words")
+      .get();
     const words = snapshot.docs.map((doc) => ({
       word: doc.id,
       translations: doc.data().translations,
@@ -130,8 +144,16 @@ app.get("/get-words", async (req, res) => {
 });
 
 app.delete("/clear-words", async (req, res) => {
+  const { uid } = req.query;
+  if (!uid) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
   try {
-    const snapshot = await db.collection("words").get();
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("words")
+      .get();
 
     const batch = db.batch();
     snapshot.docs.forEach((doc) => {
@@ -149,8 +171,16 @@ app.delete("/clear-words", async (req, res) => {
 });
 
 app.get("/get-correct-words", async (req, res) => {
+  const { uid } = req.query;
+  if (!uid) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
   try {
-    const snapshot = await db.collection("correctWords").get();
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("correctWords")
+      .get();
     const words = snapshot.docs.map((doc) => ({
       word: doc.id,
       translations: doc.data().translations,
@@ -163,8 +193,16 @@ app.get("/get-correct-words", async (req, res) => {
 });
 
 app.get("/get-incorrect-words", async (req, res) => {
+  const { uid } = req.query;
+  if (!uid) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
   try {
-    const snapshot = await db.collection("incorrectWords").get();
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("incorrectWords")
+      .get();
     const words = snapshot.docs.map((doc) => ({
       word: doc.id,
       translations: doc.data().translations,
@@ -177,9 +215,9 @@ app.get("/get-incorrect-words", async (req, res) => {
 });
 
 app.patch("/promote-word", async (req, res) => {
-  const { word, fromCollection } = req.body;
+  const { uid, word, fromCollection } = req.body;
 
-  if (!word || !fromCollection) {
+  if (!uid || !word || !fromCollection) {
     return res
       .status(400)
       .json({ message: "Word and fromCollection are required." });
@@ -198,7 +236,11 @@ app.patch("/promote-word", async (req, res) => {
   }
 
   try {
-    const docRef = db.collection(fromCollection).doc(word);
+    const docRef = db
+      .collection("users")
+      .doc(uid)
+      .collection(fromCollection)
+      .doc(word);
     const doc = await docRef.get();
 
     if (!doc.exists) {
@@ -209,7 +251,12 @@ app.patch("/promote-word", async (req, res) => {
 
     const data = doc.data();
 
-    await db.collection(toCollection).doc(word).set(data);
+    await db
+      .collection("users")
+      .doc(uid)
+      .collection(toCollection)
+      .doc(word)
+      .set(data);
     await docRef.delete();
 
     res.status(200).json({ message: `"${word}" promoted to ${toCollection}.` });
@@ -219,12 +266,20 @@ app.patch("/promote-word", async (req, res) => {
   }
 });
 app.get("/get-weekly-words", async (req, res) => {
+  const { uid } = req.query;
+  if (!uid) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
   const collections = ["incorrectWords", "correctWords"];
   const allWords = [];
 
   try {
     for (const collection of collections) {
-      const snapshot = await db.collection(collection).get();
+      const snapshot = await db
+        .collection("users")
+        .doc(uid)
+        .collection(collection)
+        .get();
       const words = snapshot.docs.map((doc) => ({
         word: doc.id,
         translations: doc.data().translations,
@@ -242,8 +297,16 @@ app.get("/get-weekly-words", async (req, res) => {
 });
 
 app.get("/get-monthly-words", async (req, res) => {
+  const { uid } = req.query;
+  if (!uid) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
   try {
-    const snapshot = await db.collection("expertWords").get();
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("expertWords")
+      .get();
     const words = snapshot.docs.map((doc) => ({
       word: doc.id,
       translations: doc.data().translations,
@@ -255,8 +318,16 @@ app.get("/get-monthly-words", async (req, res) => {
   }
 });
 app.get("/expertWords", async (req, res) => {
+  const { uid } = req.query;
+  if (!uid) {
+    return res.status(400).json({ message: "User ID is required." });
+  }
   try {
-    const snapshot = await db.collection("expertWords").get();
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("expertWords")
+      .get();
     const words = snapshot.docs.map((doc) => ({
       word: doc.id,
       translations: doc.data().translations,
