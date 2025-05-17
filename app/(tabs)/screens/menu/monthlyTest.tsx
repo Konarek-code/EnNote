@@ -1,4 +1,4 @@
-import MonthlyTestComponent from "@/components/monthlyTest/monthlyTest.component";
+import MonthlyTestComponent from "@/components/testScreen/monthlyTest/monthlyTest.component";
 
 const MonthlyTestScreen = () => {
   return <MonthlyTestComponent />;

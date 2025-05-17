@@ -29,19 +29,30 @@ import {
   AchievementDescription,
 } from "./profile.style";
 import { useRouter } from "expo-router";
-import { Button } from "react-native";
 import { logout } from "@/store/user/userSlice";
 import { useFocusEffect } from "@react-navigation/native";
+import { useWordStats } from "@/hooks/useWordsStats";
+import { fetchAccountLevel } from "@/api/words";
 
 const ProfileComponent = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [activeAchievement, setActiveAchievement] = useState<string | null>(
     null
   );
+
+  const [accountLevel, setAccountLevel] = useState<string | null>(null);
   const user = useSelector((state: RootState) => state.user);
   const { isLoggedIn } = user;
   const router = useRouter();
   const dispatch = useDispatch();
+  const formattedDate = user.createdAt
+    ? new Date(user.createdAt).toLocaleDateString("pl-PL")
+    : "error getting date";
+
+  const { correctCount, expertCount, incorrectCount, loading } = useWordStats(
+    user?.uid ?? ""
+  );
+  const totalWords = correctCount + expertCount + incorrectCount;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -52,6 +63,11 @@ const ProfileComponent = () => {
       }
     }, [isLoggedIn])
   );
+  useEffect(() => {
+    if (user?.uid) {
+      fetchAccountLevel(user?.uid).then(setAccountLevel);
+    }
+  }, [user?.uid]);
 
   if (checkingAuth) {
     return (
@@ -73,26 +89,25 @@ const ProfileComponent = () => {
       <StatsContainer>
         <StatBox>
           <StatLabel>Words {"\n"}overall</StatLabel>
-          <StatValue>0</StatValue>
+          <StatValue>{totalWords}</StatValue>
         </StatBox>
         <StatBox>
           <StatLabel>Words {"\n"}well known</StatLabel>
-          <StatValue>0</StatValue>
+          <StatValue>{correctCount}</StatValue>
         </StatBox>
         <StatBox>
           <StatLabel>Words {"\n"} expert level</StatLabel>
-          <StatValue>0</StatValue>
+          <StatValue>{expertCount}</StatValue>
         </StatBox>
       </StatsContainer>
       <DetailsBox>
         <LevelBox>
           <LevelText>Account Level</LevelText>
-          <LevelValue>Expert</LevelValue>
+          <LevelValue>{accountLevel}</LevelValue>
         </LevelBox>
-
         <AccountBox>
           <AccountText>Account created</AccountText>
-          <AccountDate>24 May 2024</AccountDate>
+          <AccountDate>{formattedDate}</AccountDate>
         </AccountBox>
       </DetailsBox>
       <AchievementsTitle>Achievements</AchievementsTitle>

@@ -17,26 +17,6 @@ export const Title = styled.Text`
   color: #bbdefb;
   margin-bottom: 20px;
 `;
-
-export const MenuItem = styled.TouchableOpacity`
-  flex-direction: row;
-  align-items: center;
-  background-color: rgba(0, 119, 182, 0.9);
-  padding: 15px;
-  margin-vertical: 5px;
-  border-radius: 12px;
-  shadow-color: #64b5f6;
-  shadow-opacity: 0.3;
-  shadow-radius: 6px;
-  elevation: 6;
-`;
-
-export const Icon = styled.Image`
-  width: 35px;
-  height: 35px;
-  margin-right: 15px;
-`;
-
 export const MenuText = styled.Text`
   font-size: 18px;
   color: white;

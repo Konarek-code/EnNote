@@ -1,24 +1,39 @@
 import React from "react";
-import { Icon, MenuItem, MenuText, Title, Container } from "./menu.styles";
 import { useRouter } from "expo-router";
+import Button from "../buttons/button.component";
+import { MenuText, Title, Container } from "./menu.styles";
+import { MenuIcon } from "../buttons/button.styles";
 
 const MenuComponent = () => {
   const router = useRouter();
+
   return (
     <Container>
       <Title>Menu</Title>
-      <MenuItem onPress={() => router.push("/(tabs)/screens/menu/wordsPassed")}>
-        <Icon source={require("@/assets/images/WordImage.png")}></Icon>
+
+      <Button
+        type="menu"
+        onPress={() => router.push("/(tabs)/screens/menu/wordsPassed")}
+      >
+        <MenuIcon source={require("@/assets/images/WordImage.png")} />
         <MenuText>Word Passed</MenuText>
-      </MenuItem>
-      <MenuItem onPress={() => router.push("/(tabs)/screens/menu/stats")}>
-        <Icon source={require("@/assets/images/StatsIcon.png")}></Icon>
+      </Button>
+
+      <Button
+        type="menu"
+        onPress={() => router.push("/(tabs)/screens/menu/stats")}
+      >
+        <MenuIcon source={require("@/assets/images/StatsIcon.png")} />
         <MenuText>Statistic</MenuText>
-      </MenuItem>
-      <MenuItem onPress={() => router.push("/(tabs)/screens/menu/upTimers")}>
-        <Icon source={require("@/assets/images/StopwatchIcon.png")}></Icon>
+      </Button>
+
+      <Button
+        type="menu"
+        onPress={() => router.push("/(tabs)/screens/menu/upTimers")}
+      >
+        <MenuIcon source={require("@/assets/images/StopwatchIcon.png")} />
         <MenuText>Upcoming test timer</MenuText>
-      </MenuItem>
+      </Button>
     </Container>
   );
 };

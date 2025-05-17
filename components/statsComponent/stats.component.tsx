@@ -3,7 +3,6 @@ import { Feather } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store/store";
 import { router } from "expo-router";
-import { TouchableOpacity, Button } from "react-native";
 import {
   Container,
   ScrollContainer,
@@ -16,11 +15,11 @@ import {
   MiniCard,
   SmallText,
   BoldText,
-  BackButton,
 } from "./stats.style";
 import { MaterialIcons } from "@expo/vector-icons";
 import { loadTestHistory } from "@/utils/testHistory";
 import useAppUsageTimer, { getUsageTime } from "@/utils/usageAppTimer";
+import Button from "../buttons/button.component";
 
 const calculateStreak = (dateSet: Set<string>) => {
   let streak = 0;
@@ -125,12 +124,12 @@ const StatsComponent = () => {
   return (
     <Container>
       <ScrollContainer>
-        <BackButton
-          as={TouchableOpacity}
+        <Button
+          type="back"
           onPress={() => router.push("/(tabs)/screens/menu/menu")}
         >
           <Feather name={icons.arrowleft} size={30} color={"#ffffff"} />
-        </BackButton>
+        </Button>
 
         <Header>📊 Your Statistics</Header>
         <Brake />
@@ -164,36 +163,19 @@ const StatsComponent = () => {
             🔥 Current Streak: {streak} day{streak === 1 ? "" : "s"}
           </SmallText>
         </Card>
-
         <Row>
           <MiniCard>
-            <MaterialIcons name="emoji-events" size={24} color="gold" />
-            <SmallText>Your Rank</SmallText>
+            <MaterialIcons name="local-fire-department" size={24} color="red" />
+            <SmallText>🔥 Current Streak</SmallText>
             <BoldText>
-              {averageAccuracy >= 90
-                ? "Expert"
-                : averageAccuracy >= 75
-                ? "Advanced"
-                : averageAccuracy >= 50
-                ? "Intermediate"
-                : "Beginner"}
+              {streak} day{streak === 1 ? "" : "s"}
             </BoldText>
           </MiniCard>
 
           <MiniCard>
             <MaterialIcons name="timer" size={24} color="blue" />
             <SmallText>Time Spent Learning</SmallText>
-            <BoldText>
-              {" "}
-              <BoldText>{(usageTime / 60000).toFixed(1)} min</BoldText>
-            </BoldText>
-            <Button
-              title="Symuluj wyjście"
-              onPress={() => {
-                const duration = 60000; // 1 minuta testowo
-                setUsageTime(duration);
-              }}
-            />
+            <BoldText>{(usageTime / 60000).toFixed(1)} min</BoldText>
           </MiniCard>
         </Row>
       </ScrollContainer>

@@ -8,3 +8,6 @@ export const Input = styled.TextInput`
   border-radius: 5px;
   background-color: white;
 `;
+export const Wrapper = styled.KeyboardAvoidingView`
+  width: 100%;
+`;

@@ -1,41 +1,44 @@
+// components/register/RegisterForm.tsx
 import React from "react";
-import { Alert, ActivityIndicator, Text } from "react-native";
+import { ActivityIndicator, Text, Alert } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
-import { useRouter } from "expo-router";
-import { register } from "@/utils/firebaseAuth";
-import GoogleIcon from "@/assets/signin-assets/signin-assets/Android/png2x/light/android_light_rd_na2x.png";
-
+import FormField from "../Formfiled/formFiled";
 import {
-  Container,
-  Title,
-  Input,
-  ErrorText,
-  ButtonPrimary,
-  ButtonPrimaryText,
-  SignupWrapper,
-  SignupRegular,
-  SignupBold,
   BreakText,
-  GoogleButton,
-  GoogleIconImage,
   HorizontalLine,
-} from "../loginComponent/login.component.style"; // Reuse login styles
+  Container,
+  SignupWrapper,
+  SignupBold,
+  SignupRegular,
+} from "../loginComponent/login.component.style"; // zaktualizuj do właściwej ścieżki
+import GoogleIcon from "@/assets/signin-assets/signin-assets/Android/png2x/light/android_light_rd_na2x.png";
+import { register } from "@/utils/firebaseAuth";
+import { useRouter } from "expo-router";
+import Button from "../buttons/button.component";
+import {
+  ButtonPrimaryText,
+  GoogleButtonText,
+  GoogleIconImage,
+} from "../buttons/button.styles";
 
 const RegisterSchema = Yup.object().shape({
-  name: Yup.string().min(2, "Name too short").required("Name is required"),
+  name: Yup.string()
+    .max(10, "Name must be at most 10 characters")
+    .required("Name is required"),
   email: Yup.string().email("Invalid email").required("Email is required"),
   password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
+    .matches(/[A-Z]/, "Must include at least one uppercase letter")
+    .matches(/[0-9]/, "Must include at least one number")
+    .min(6, "Minimum 6 characters")
     .required("Password is required"),
 });
 
-const RegisterScreen = () => {
+const RegisterForm = () => {
   const router = useRouter();
 
   return (
     <Container>
-      <Title>Register</Title>
       <Formik
         initialValues={{ name: "", email: "", password: "" }}
         validationSchema={RegisterSchema}
@@ -60,46 +63,37 @@ const RegisterScreen = () => {
           isSubmitting,
         }) => (
           <>
-            <Input
+            <FormField
               placeholder="Name"
-              hasError={!!errors.name && touched.name}
-              onChangeText={handleChange("name")}
-              onBlur={handleBlur("name")}
               value={values.name}
+              onChangeText={handleChange("name")}
+              onBlur={() => handleBlur("name")}
+              error={errors.name}
+              touched={touched.name}
               editable={!isSubmitting}
             />
-            {!!errors.name && touched.name && (
-              <ErrorText>{errors.name}</ErrorText>
-            )}
-
-            <Input
+            <FormField
               placeholder="Email"
-              hasError={!!errors.email && touched.email}
-              onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
               value={values.email}
-              autoCapitalize="none"
+              onChangeText={handleChange("email")}
+              onBlur={() => handleBlur("email")}
+              error={errors.email}
+              touched={touched.email}
               keyboardType="email-address"
               editable={!isSubmitting}
             />
-            {!!errors.email && touched.email && (
-              <ErrorText>{errors.email}</ErrorText>
-            )}
-
-            <Input
+            <FormField
               placeholder="Password"
-              hasError={!!errors.password && touched.password}
-              onChangeText={handleChange("password")}
-              onBlur={handleBlur("password")}
               value={values.password}
+              onChangeText={handleChange("password")}
+              onBlur={() => handleBlur("password")}
+              error={errors.password}
+              touched={touched.password}
               secureTextEntry
               editable={!isSubmitting}
             />
-            {!!errors.password && touched.password && (
-              <ErrorText>{errors.password}</ErrorText>
-            )}
-
-            <ButtonPrimary
+            <Button
+              type="primary"
               onPress={() => handleSubmit()}
               disabled={isSubmitting}
             >
@@ -108,28 +102,36 @@ const RegisterScreen = () => {
               ) : (
                 <ButtonPrimaryText>Sign up</ButtonPrimaryText>
               )}
-            </ButtonPrimary>
+            </Button>
             <HorizontalLine />
-            <BreakText> or </BreakText>
-
-            <GoogleButton disabled={isSubmitting}>
+            <BreakText>or</BreakText>
+            <Button
+              type="google"
+              disabled={isSubmitting}
+              onPress={() => {
+                // TODO: Implement Google sign up logic here
+                Alert.alert(
+                  "Google Sign Up",
+                  "Google sign up not implemented yet."
+                );
+              }}
+            >
               <GoogleIconImage source={GoogleIcon} />
-              <Text style={{ fontWeight: "600", fontSize: 16 }}>
-                Sign up with Google
-              </Text>
-            </GoogleButton>
+              <GoogleButtonText>Sign up with Google</GoogleButtonText>
+            </Button>
           </>
         )}
       </Formik>
-
       <SignupWrapper
-        onPress={() => router.replace("/(tabs)/screens/loginScreen")}
+        onPress={() => {
+          router.replace("/(tabs)/screens/loginScreen");
+        }}
       >
-        <SignupRegular>Already have an account? </SignupRegular>
-        <SignupBold>Log in</SignupBold>
+        <SignupRegular>Already have an account?</SignupRegular>
+        <SignupBold> Sign in</SignupBold>
       </SignupWrapper>
     </Container>
   );
 };
 
-export default RegisterScreen;
+export default RegisterForm;

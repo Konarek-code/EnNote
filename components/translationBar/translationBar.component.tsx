@@ -1,5 +1,8 @@
 import React from "react";
-import { TranslationBarContainer } from "./translationBar.style";
+import {
+  TranslationBarContainer,
+  TranslationText,
+} from "./translationBar.style";
 import { Text } from "react-native"; // Używamy komponentu Text z React Native zamiast h2
 
 interface TranslationBarProps {
@@ -10,13 +13,9 @@ const TranslationBar: React.FC<TranslationBarProps> = ({ translation }) => {
   return (
     <TranslationBarContainer>
       {translation ? (
-        <Text style={{ fontSize: 18, color: "#fff" }}>
-          Translation: {translation}
-        </Text>
+        <TranslationText>Translation: {translation}</TranslationText>
       ) : (
-        <Text style={{ fontSize: 18, color: "#fff" }}>
-          No translation available
-        </Text>
+        <TranslationText>No translation available</TranslationText>
       )}
     </TranslationBarContainer>
   );

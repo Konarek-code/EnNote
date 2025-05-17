@@ -1,20 +1,22 @@
 import React from "react";
-import { Alert, Text, ActivityIndicator } from "react-native";
+import { Alert, ActivityIndicator } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import { useRouter } from "expo-router";
 import { loginUser } from "@/utils/firebaseAuth";
 import GoogleIcon from "@/assets/signin-assets/signin-assets/Android/png2x/light/android_light_rd_na2x.png";
+import FormField from "../Formfiled/formFiled";
+import Button from "../buttons/button.component";
+import {
+  ButtonPrimaryText,
+  GoogleButtonText,
+  GoogleIconImage,
+} from "../buttons/button.styles";
 
 import {
   Container,
   Title,
-  Input,
   ErrorText,
-  ButtonPrimary,
-  ButtonPrimaryText,
-  GoogleButton,
-  GoogleIconImage,
   HorizontalLine,
   BreakText,
   SignupRegular,
@@ -68,24 +70,23 @@ const LoginScreen = () => {
           isSubmitting,
         }) => (
           <>
-            <Input
+            <FormField
               placeholder="Email"
               hasError={!!errors.email && touched.email}
               onChangeText={handleChange("email")}
-              onBlur={handleBlur("email")}
+              onBlur={() => handleBlur("email")}
               value={values.email}
-              autoCapitalize="none"
               keyboardType="email-address"
               editable={!isSubmitting}
             />
             {!!errors.email && touched.email && (
               <ErrorText>{errors.email}</ErrorText>
             )}
-            <Input
+            <FormField
               placeholder="Password"
               hasError={!!errors.password && touched.password}
               onChangeText={handleChange("password")}
-              onBlur={handleBlur("password")}
+              onBlur={() => handleBlur("password")}
               value={values.password}
               secureTextEntry
               editable={!isSubmitting}
@@ -93,7 +94,8 @@ const LoginScreen = () => {
             {!!errors.password && touched.password && (
               <ErrorText>{errors.password}</ErrorText>
             )}
-            <ButtonPrimary
+            <Button
+              type="primary"
               onPress={() => handleSubmit()}
               disabled={isSubmitting}
             >
@@ -102,15 +104,23 @@ const LoginScreen = () => {
               ) : (
                 <ButtonPrimaryText>Sign in</ButtonPrimaryText>
               )}
-            </ButtonPrimary>
+            </Button>
             <HorizontalLine></HorizontalLine>
             <BreakText> or </BreakText>
-            <GoogleButton disabled={isSubmitting}>
+            <Button
+              type="google"
+              disabled={isSubmitting}
+              onPress={() => {
+                // TODO: Implement Google sign-in logic here
+                Alert.alert(
+                  "Google Sign In",
+                  "Google sign-in not implemented yet."
+                );
+              }}
+            >
               <GoogleIconImage source={GoogleIcon} />
-              <Text style={{ fontWeight: "600", fontSize: 16 }}>
-                Sign in with Google
-              </Text>
-            </GoogleButton>
+              <GoogleButtonText>Sign in with Google</GoogleButtonText>
+            </Button>
           </>
         )}
       </Formik>

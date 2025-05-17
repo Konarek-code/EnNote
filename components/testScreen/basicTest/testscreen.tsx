@@ -1,5 +1,5 @@
 import React from "react";
-import WordInput from "../inputComponent/wordInput.component";
+import WordInput from "../../inputWordComponent/wordInput.component";
 import {
   Container,
   StyledButton,
