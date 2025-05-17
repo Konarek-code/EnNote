@@ -1,6 +1,6 @@
 import React from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
-import { Input } from "./wordInput.style";
+import { Platform } from "react-native";
+import { Input, Wrapper } from "./wordInput.style";
 
 type WordInputProps = {
   value: string;
@@ -14,10 +14,7 @@ const WordInput: React.FC<WordInputProps> = ({
   placeholder = "Type a word",
 }) => {
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.wrapper}
-    >
+    <Wrapper behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <Input
         value={value}
         onChangeText={(text: string) => {
@@ -26,14 +23,8 @@ const WordInput: React.FC<WordInputProps> = ({
         placeholder={placeholder}
         keyboardType="default"
       />
-    </KeyboardAvoidingView>
+    </Wrapper>
   );
 };
-
-const styles = StyleSheet.create({
-  wrapper: {
-    width: "100%",
-  },
-});
 
 export default WordInput;

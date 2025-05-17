@@ -17,8 +17,10 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
             uid: user.uid,
             email: user.email ?? "",
             name: "",
+            createdAt: user.metadata.creationTime || new Date().toISOString(),
           })
         );
+        console.log("Firebase createdAt:", user.metadata.creationTime);
       } else {
         dispatch(logout());
       }

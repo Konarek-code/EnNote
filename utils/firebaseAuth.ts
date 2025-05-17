@@ -6,7 +6,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { db } from "./firebaseConfig";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "./firebaseConfig";
 import { login } from "@/store/user/userSlice";
 import { store } from "@/store/store";
@@ -45,11 +45,13 @@ export async function loginUser(email: string, password: string) {
     password
   );
   const user = userCredential.user;
+
   store.dispatch(
     login({
       name: user.displayName || "",
       email: user.email || "",
       uid: user.uid,
+      createdAt: user.metadata?.creationTime || "",
     })
   );
 

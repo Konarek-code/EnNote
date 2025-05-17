@@ -1,15 +1,12 @@
 import React, { useEffect, useState } from "react";
-import {
-  StyledButton,
-  ButtonText,
-  Message,
-  WordsPassed,
-} from "./wordInputSection.style";
-import WordInput from "../inputComponent/wordInput.component";
+import { Message, WordsPassed } from "./wordInputSection.style";
+import WordInput from "../inputWordComponent/wordInput.component";
 import TranslationBar from "../translationBar/translationBar.component";
 import { validateAndTranslateWord, saveWord, getWords } from "@/api/words";
 import { useSelector } from "react-redux";
 import { useCounter } from "@/hooks/useCounter";
+import Button from "../buttons/button.component";
+import { ButtonText } from "../buttons/button.styles";
 
 type Props = {
   onWordAdded: (word: { word: string; translations: string[] }) => void;
@@ -69,9 +66,13 @@ const WordInputSection: React.FC<Props> = ({ onWordAdded, onTestReady }) => {
         setIsValid(false);
         return;
       }
-
       if (words.some((w) => w.word.toLowerCase() === word)) {
         setValidationMessage(`"${word}" already exists in the database.`);
+        setIsValid(false);
+        return;
+      }
+      if (!user?.uid) {
+        setValidationMessage("You must be logged in to save a word.");
         setIsValid(false);
         return;
       }
@@ -99,11 +100,11 @@ const WordInputSection: React.FC<Props> = ({ onWordAdded, onTestReady }) => {
     <>
       <WordsPassed>Words Passed: {counter}/10</WordsPassed>
       <WordInput value={inputValue} onChangeText={handleInputChange} />
-      <StyledButton onPress={handleValidate} disabled={isLoading}>
+      <Button type="translate" onPress={handleValidate} disabled={isLoading}>
         <ButtonText>
           {isLoading ? "Translating word..." : "Translate"}
         </ButtonText>
-      </StyledButton>
+      </Button>
       {validationMessage && (
         <Message isValid={isValid}>{validationMessage}</Message>
       )}

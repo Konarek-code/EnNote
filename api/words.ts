@@ -1,3 +1,5 @@
+import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
+
 const BASE_URL = "https://backend-305143166666.europe-central2.run.app";
 
 export const validateAndTranslateWord = async (
@@ -53,4 +55,53 @@ export const clearWords = async (uid: string): Promise<void> => {
   if (!response.ok) {
     throw new Error("Failed to clear words");
   }
+};
+
+export const fetchAccountLevel = async (
+  uid: string
+): Promise<"beginner" | "intermediate" | "Expert"> => {
+  try {
+    const [expertRes, correctRes] = await Promise.all([
+      fetch(`${BASE_URL}/expertWords?uid=${uid}`),
+      fetch(`${BASE_URL}/get-correct-words?uid=${uid}`),
+    ]);
+    const expertData = await expertRes.json();
+    const correctData = await correctRes.json();
+    if (expertData.length > 10) {
+      return "Expert";
+    }
+    if (correctData.length > 10) {
+      return "intermediate";
+    }
+    return "beginner";
+  } catch (error) {
+    console.error("Error fetching account level:", error);
+    throw error;
+  }
+};
+export const fetchCorrectWords = async (uid: string) => {
+  if (!uid) throw new Error("Missing UID");
+  const res = await fetch(
+    `https://backend-305143166666.europe-central2.run.app/get-correct-words?uid=${uid}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch correct words");
+  return await res.json();
+};
+
+export const fetchExpertWords = async (uid: string) => {
+  if (!uid) throw new Error("Missing UID");
+  const res = await fetch(
+    `https://backend-305143166666.europe-central2.run.app/expertWords?uid=${uid}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch expert words");
+  return await res.json();
+};
+
+export const fetchIncorrectWords = async (uid: string) => {
+  if (!uid) throw new Error("Misssing UID");
+  const res = await fetch(
+    `https://backend-305143166666.europe-central2.run.app/get-incorrect-words?uid=${uid}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch incorrect words");
+  return await res.json();
 };

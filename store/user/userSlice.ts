@@ -5,6 +5,7 @@ export interface UserState {
   email: string | null;
   isLoggedIn: boolean;
   name: string | null;
+  createdAt?: string | null;
 }
 
 const initialState: UserState = {
@@ -12,6 +13,7 @@ const initialState: UserState = {
   email: null,
   isLoggedIn: false,
   name: null,
+  createdAt: null,
 };
 
 export const userSlice = createSlice({
@@ -20,18 +22,25 @@ export const userSlice = createSlice({
   reducers: {
     login: (
       state,
-      action: PayloadAction<{ uid: string; email: string; name: string }>
+      action: PayloadAction<{
+        uid: string;
+        email: string;
+        name: string;
+        createdAt: string;
+      }>
     ) => {
       state.uid = action.payload.uid;
       state.email = action.payload.email;
       state.name = action.payload.name;
       state.isLoggedIn = true;
+      state.createdAt = action.payload.createdAt || null;
     },
     logout: (state) => {
       state.uid = null;
       state.email = null;
       state.isLoggedIn = false;
       state.name = null;
+      state.createdAt = null;
     },
   },
 });

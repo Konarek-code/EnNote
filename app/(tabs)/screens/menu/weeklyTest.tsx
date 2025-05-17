@@ -1,4 +1,4 @@
-import WeeklyTestComponent from "@/components/weeklyTest/weeklyTest.component";
+import WeeklyTestComponent from "@/components/testScreen/weeklyTest/weeklyTest.component";
 
 const WeeklyTestScreen = () => {
   return <WeeklyTestComponent />;

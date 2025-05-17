@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Container, StyledImage } from "./home.component.style";
 
 import WordInputSection from "../wordInput/wordInputSection.component";
-import TestScreen from "../testScreen/testscreen";
+import TestScreen from "../testScreen/basicTest/testscreen";
 
 import { useCounter } from "@/hooks/useCounter";
 import { getWords } from "@/api/words";
