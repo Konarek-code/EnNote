@@ -37,3 +37,6 @@ serviceAccountKey.json
 *.tsbuildinfo
 
 app-example
+
+
+firebaseConfig.ts

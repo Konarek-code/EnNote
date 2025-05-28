@@ -6,6 +6,9 @@ export interface UserState {
   isLoggedIn: boolean;
   name: string | null;
   createdAt?: string | null;
+  firstTestStarted?: boolean;
+  testStartTimestamp?: string | null;
+  gender?: string | null;
 }
 
 const initialState: UserState = {
@@ -14,6 +17,9 @@ const initialState: UserState = {
   isLoggedIn: false,
   name: null,
   createdAt: null,
+  firstTestStarted: false,
+  testStartTimestamp: null,
+  gender: null,
 };
 
 export const userSlice = createSlice({
@@ -27,6 +33,8 @@ export const userSlice = createSlice({
         email: string;
         name: string;
         createdAt: string;
+        firstTestStarted?: boolean;
+        gender?: string;
       }>
     ) => {
       state.uid = action.payload.uid;
@@ -34,6 +42,9 @@ export const userSlice = createSlice({
       state.name = action.payload.name;
       state.isLoggedIn = true;
       state.createdAt = action.payload.createdAt || null;
+      state.firstTestStarted = action.payload.firstTestStarted || false;
+      state.testStartTimestamp = null;
+      state.gender = action.payload.gender || null;
     },
     logout: (state) => {
       state.uid = null;
@@ -41,9 +52,22 @@ export const userSlice = createSlice({
       state.isLoggedIn = false;
       state.name = null;
       state.createdAt = null;
+      state.firstTestStarted = false;
+      state.testStartTimestamp = null;
+      state.gender = null;
+    },
+    setFirstTestStarted: (state, action: PayloadAction<boolean>) => {
+      state.firstTestStarted = action.payload;
+    },
+    setTestStartTimestamp: (state, action: PayloadAction<string | null>) => {
+      state.testStartTimestamp = action.payload;
+    },
+    setGender: (state, action: PayloadAction<string | null>) => {
+      state.gender = action.payload;
     },
   },
 });
 
-export const { login, logout } = userSlice.actions;
+export const { login, logout, setFirstTestStarted, setTestStartTimestamp } =
+  userSlice.actions;
 export default userSlice.reducer;

@@ -5,15 +5,11 @@ import {
   StyledTitle,
   StyledParagraph,
   StyledInput,
-  StyledButton,
-  StyledButtonText,
 } from "./monthlyTest.style";
-
-interface Word {
-  word: string;
-  translations: string[];
-  level: "incorrectWords" | "correctWords";
-}
+import { useSelector } from "react-redux";
+import { fetchMonthlyWords, promoteWord, Word } from "@/api/words"; // <- upewnij się, że ścieżka jest poprawna
+import Button from "@/components/buttons/button.component";
+import { ButtonText } from "@/components/buttons/button.styles";
 
 const MonthlyTestComponent = () => {
   const [words, setWords] = useState<Word[]>([]);
@@ -22,52 +18,40 @@ const MonthlyTestComponent = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const uid = useSelector((state: any) => state.user.uid);
+
   useEffect(() => {
-    const fetchWords = async () => {
+    if (!uid) return;
+
+    const loadWords = async () => {
       setLoading(true);
       try {
-        const response = await fetch(
-          "https://backend-305143166666.europe-central2.run.app/get-weekly-words"
-        );
-        const data = await response.json();
-        setWords(data);
+        const monthlyWords = await fetchMonthlyWords(uid);
+        setWords(monthlyWords);
       } catch (err) {
-        console.error("Failed to fetch weekly words:", err);
+        console.error("Failed to load monthly words:", err);
+        setMessage("❌ Failed to load words.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWords();
-  }, []);
+    loadWords();
+  }, [uid]);
 
   const handleSubmit = async () => {
     const currentWord = words[currentIndex];
-
     if (!currentWord) return;
 
     const isCorrect = currentWord.translations.includes(userInput.trim());
 
     if (isCorrect) {
-      // Promote if eligible
       try {
-        await fetch(
-          "https://backend-305143166666.europe-central2.run.app/promote-word",
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              word: currentWord.word,
-              fromCollection: currentWord.level,
-            }),
-          }
-        );
+        await promoteWord(uid, currentWord.word, currentWord.level);
         setMessage("✅ Correct! Word promoted.");
       } catch (err) {
+        console.error("Promotion failed:", err);
         setMessage("✅ Correct! But promotion failed.");
-        console.error(err);
       }
     } else {
       setMessage("❌ Incorrect. Try again.");
@@ -77,22 +61,27 @@ const MonthlyTestComponent = () => {
     setCurrentIndex((prev) => prev + 1);
   };
 
-  if (currentIndex >= words.length) {
-    return <StyledMessage>🎉 Test completed!</StyledMessage>;
+  if (loading && words.length === 0) {
+    return <StyledMessage>Loading monthly words...</StyledMessage>;
   }
+
+  if (currentIndex >= words.length) {
+    return <StyledMessage>🎉 Monthly test completed!</StyledMessage>;
+  }
+
   return (
     <StyledContainer>
-      <StyledTitle>Weekly Test</StyledTitle>
+      <StyledTitle>Monthly Test</StyledTitle>
       <StyledParagraph>Translate: {words[currentIndex].word}</StyledParagraph>
       <StyledInput
         value={userInput}
-        onChangeText={(text: string) => setUserInput(text)}
+        onChangeText={setUserInput}
         placeholder="Your translation"
-        disabled={loading} // Wyłącz pole w trakcie ładowania
+        editable={!loading}
       />
-      <StyledButton onPress={handleSubmit} disabled={loading}>
-        <StyledButtonText>{loading ? "Loading..." : "Submit"}</StyledButtonText>
-      </StyledButton>
+      <Button onPress={handleSubmit} type="action" disabled={loading}>
+        <ButtonText>{loading ? "Loading..." : "Submit"}</ButtonText>
+      </Button>
       <StyledMessage>{message}</StyledMessage>
     </StyledContainer>
   );

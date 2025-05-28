@@ -6,86 +6,146 @@ import {
   TestTitle,
   TimeText,
   ButtonRow,
-  ActionButton,
-  ButtonText,
   Title,
   Brake,
   BackButton,
 } from "./upTimers.style";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { TouchableOpacity } from "react-native";
+import { ScrollView, TouchableOpacity } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import Button from "../buttons/button.component";
+import { ButtonText } from "../buttons/button.styles";
+import { useWordStats } from "@/hooks/useWordsStats";
 
 const UpcomingTimersComponent = () => {
   const router = useRouter();
+  const user = useSelector((state: any) => state.user);
+  const dispatch = useDispatch();
+
+  const WEEKLY_DURATION = 7 * 24 * 60 * 60;
+  const MONTHLY_DURATION = 30 * 24 * 60 * 60;
+
+  const getRemainingTime = (startTimestamp: number, duration: number) => {
+    const now = Math.floor(Date.now() / 1000);
+    const elapsed = now - startTimestamp;
+    const remaining = duration - elapsed;
+    return remaining > 0 ? remaining : 0;
+  };
+
+  const { correctCount, expertCount, incorrectCount, loading } = useWordStats(
+    user?.uid ?? ""
+  );
+  const totalWords = correctCount + expertCount + incorrectCount;
+
+  const weeklyRemaining =
+    user.firstTestStarted && user.testStartTimestamp
+      ? getRemainingTime(user.testStartTimestamp, WEEKLY_DURATION)
+      : WEEKLY_DURATION;
+
+  const monthlyRemaining =
+    user.firstTestStarted && user.testStartTimestamp
+      ? getRemainingTime(user.testStartTimestamp, MONTHLY_DURATION)
+      : MONTHLY_DURATION;
+
+  const isTestLocked = !user.firstTestStarted || correctCount > 10;
+  const isTestLockedexpert = !user.firstTestStarted || expertCount > 5;
   return (
-    <Container>
-      <BackButton
-        as={TouchableOpacity}
-        onPress={() => router.push("/(tabs)/screens/menu/menu")}
-      >
-        <Feather name="arrow-left" size={30} color={"#ffffff"} />
-      </BackButton>
-      <Title>Upcoming Tests</Title>
-      <Brake />
-
-      <TestSection>
-        <TestTitle>Weekly Test</TestTitle>
-        <CountdownCircleTimer
-          isPlaying
-          duration={180000}
-          colors={["#4CAF50", "#FFC107", "#F44336"]}
-          colorsTime={[120000, 60000, 0]}
-          size={120}
+    <ScrollView>
+      <Container>
+        <BackButton
+          as={TouchableOpacity}
+          onPress={() => router.push("/(tabs)/screens/menu/menu")}
         >
-          {({ remainingTime }) => (
-            <TimeText>
-              {Math.floor(remainingTime / 3600)}h{" "}
-              {Math.floor((remainingTime % 3600) / 60)}m
-            </TimeText>
-          )}
-        </CountdownCircleTimer>
-        <ButtonRow>
-          <ActionButton secondary>
-            <ButtonText>Need more time</ButtonText>
-          </ActionButton>
-          <ActionButton
-            onPress={() => router.push("/(tabs)/screens/menu/weeklyTest")} // Navigate to the weekly test screen
-          >
-            <ButtonText>Start now</ButtonText>
-          </ActionButton>
-        </ButtonRow>
-      </TestSection>
+          <Feather name="arrow-left" size={30} color={"#ffffff"} />
+        </BackButton>
 
-      {/* Monthly Test Section */}
-      <TestSection>
-        <TestTitle>Monthly Test</TestTitle>
-        <CountdownCircleTimer
-          isPlaying
-          duration={259200}
-          colors={["#4CAF50", "#FFC107", "#F44336"]}
-          colorsTime={[172800, 86400, 0]}
-          size={120}
-        >
-          {({ remainingTime }) => (
-            <TimeText>
-              {Math.floor(remainingTime / 3600)}h{" "}
-              {Math.floor((remainingTime % 3600) / 60)}m
-            </TimeText>
-          )}
-        </CountdownCircleTimer>
-        <ButtonRow>
-          <ActionButton secondary>
-            <ButtonText>Need more time</ButtonText>
-          </ActionButton>
-          <ActionButton
-            onPress={() => router.push("/(tabs)/screens/menu/monthlyTest")} // Navigate to the monthly test screen
+        <Title>Upcoming Tests</Title>
+        <Brake />
+
+        {/* Weekly Test */}
+        <TestSection>
+          <TestTitle>Weekly Test</TestTitle>
+          <CountdownCircleTimer
+            isPlaying={!!user.firstTestStarted}
+            duration={WEEKLY_DURATION}
+            initialRemainingTime={weeklyRemaining}
+            colors={["#00e0ff", "#00bfff", "#0050a0"]}
+            colorsTime={[WEEKLY_DURATION, WEEKLY_DURATION / 2, 0]}
+            size={140}
+            onComplete={() => {
+              router.push("/(tabs)/screens/menu/weeklyTest");
+              return { shouldRepeat: false };
+            }}
           >
-            <ButtonText>Start now</ButtonText>
-          </ActionButton>
-        </ButtonRow>
-      </TestSection>
-    </Container>
+            {({ remainingTime }) => (
+              <TimeText>
+                {Math.floor(remainingTime / 3600)}h{" "}
+                {Math.floor((remainingTime % 3600) / 60)}m
+              </TimeText>
+            )}
+          </CountdownCircleTimer>
+
+          <ButtonRow>
+            <Button
+              type="action"
+              secondary={false}
+              onPress={() => router.push("/(tabs)/screens/menu/weeklyTest")}
+              disabled={isTestLocked}
+            >
+              {isTestLocked ? (
+                <ButtonText>
+                  Add at least 10 words to start this test.
+                </ButtonText>
+              ) : (
+                <ButtonText>Start Weekly Test</ButtonText>
+              )}
+            </Button>
+          </ButtonRow>
+        </TestSection>
+
+        {/* Monthly Test */}
+        <TestSection>
+          <TestTitle>Monthly Test</TestTitle>
+          <CountdownCircleTimer
+            isPlaying={!!user.firstTestStarted}
+            duration={MONTHLY_DURATION}
+            initialRemainingTime={monthlyRemaining}
+            colors={["#76ff03", "#fdd835", "#e65100"]}
+            colorsTime={[MONTHLY_DURATION, MONTHLY_DURATION / 2, 0]}
+            size={140}
+            onComplete={() => {
+              router.push("/(tabs)/screens/menu/monthlyTest");
+              return { shouldRepeat: false };
+            }}
+          >
+            {({ remainingTime }) => (
+              <TimeText>
+                {Math.floor(remainingTime / 3600)}h{" "}
+                {Math.floor((remainingTime % 3600) / 60)}m
+              </TimeText>
+            )}
+          </CountdownCircleTimer>
+
+          <ButtonRow>
+            <Button
+              type="action"
+              secondary={false}
+              disabled={isTestLockedexpert}
+              onPress={() => router.push("/(tabs)/screens/menu/monthlyTest")}
+            >
+              {isTestLockedexpert ? (
+                <ButtonText>
+                  Add at least 5 expert words to start this test.
+                </ButtonText>
+              ) : (
+                <ButtonText>Start mothnly Test</ButtonText>
+              )}
+            </Button>
+          </ButtonRow>
+        </TestSection>
+      </Container>
+    </ScrollView>
   );
 };
 

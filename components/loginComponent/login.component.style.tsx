@@ -1,4 +1,4 @@
-// LoginScreen.styles.ts
+import { ScrollView } from "react-native";
 import styled from "styled-components/native";
 
 export const Container = styled.View`
@@ -51,4 +51,20 @@ export const BreakText = styled.Text`
   color: #333;
   text-align: center;
   margin: 10px 0;
+`;
+export const PickerWrapper = styled.View`
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+`;
+
+export const StyledScrollView = styled(ScrollView).attrs({
+  contentContainerStyle: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  keyboardShouldPersistTaps: "handled",
+})`
+  flex: 1;
+  background-color: #fff;
 `;

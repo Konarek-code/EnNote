@@ -37,31 +37,6 @@ export const StyledInput = styled.TextInput`
     background-color: #eaeaea;
   `}
 `;
-
-export const StyledButton = styled.TouchableOpacity`
-  width: 100%;
-  padding: 12px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  ${({ disabled }: { disabled?: boolean }) =>
-    disabled &&
-    `
-    background-color: #5a5a5a;
-    cursor: not-allowed;
-  `}
-`;
-
-export const StyledButtonText = styled.Text`
-  color: white;
-  text-align: center;
-`;
-
 export const StyledMessage = styled.Text`
   margin-top: 20px;
   font-size: 16px;

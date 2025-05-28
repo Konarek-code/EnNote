@@ -27,6 +27,7 @@ import {
   LogoutButton,
   LogoutButtonText,
   AchievementDescription,
+  IndicatorContainer,
 } from "./profile.style";
 import { useRouter } from "expo-router";
 import { logout } from "@/store/user/userSlice";
@@ -45,6 +46,12 @@ const ProfileComponent = () => {
   const { isLoggedIn } = user;
   const router = useRouter();
   const dispatch = useDispatch();
+
+  const profileImage =
+    user.gender === "female"
+      ? require("@/assets/images/profileW.png")
+      : require("@/assets/images/profile.png");
+
   const formattedDate = user.createdAt
     ? new Date(user.createdAt).toLocaleDateString("pl-PL")
     : "error getting date";
@@ -71,9 +78,9 @@ const ProfileComponent = () => {
 
   if (checkingAuth) {
     return (
-      <Container style={{ justifyContent: "center", alignItems: "center" }}>
+      <IndicatorContainer>
         <ActivityIndicator size="large" color="#3b82f6" />
-      </Container>
+      </IndicatorContainer>
     );
   }
 
@@ -81,7 +88,7 @@ const ProfileComponent = () => {
     <Container>
       <ProfileHeader>
         <ProfileBackground>
-          <ProfileImage source={require("@/assets/images/profile.png")} />
+          <ProfileImage source={profileImage} />
         </ProfileBackground>
         <Username>{user.name || "Guest"}</Username>
         <Handle>@{user.email || "no-email"}</Handle>
