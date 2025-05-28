@@ -5,14 +5,16 @@ import {
   StyledTitle,
   StyledParagraph,
   StyledInput,
-  StyledButton,
-  StyledButtonText,
 } from "./weeklyTest.style";
+import { fetchWeeklyWords, promoteWord } from "@/api/words"; // import Twoich funkcji API
+import { useSelector } from "react-redux"; // lub inny sposób na pobranie UID
+import Button from "@/components/buttons/button.component";
+import { ButtonText } from "@/components/buttons/button.styles";
 
 interface Word {
   word: string;
   translations: string[];
-  level: "incorrectWords" | "correctWords";
+  level: "incorrectWords" | "correctWords" | "expertWords";
 }
 
 const WeeklyTestComponent = () => {
@@ -22,48 +24,36 @@ const WeeklyTestComponent = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const uid = useSelector((state: any) => state.user.uid);
+
   useEffect(() => {
-    const fetchWords = async () => {
-      setLoading(true); // Rozpocznij ładowanie
+    if (!uid) return;
+
+    const loadWords = async () => {
+      setLoading(true);
       try {
-        const response = await fetch(
-          "https://backend-305143166666.europe-central2.run.app/get-weekly-words"
-        );
-        const data = await response.json();
+        const data = await fetchWeeklyWords(uid);
         setWords(data);
-      } catch (err) {
-        console.error("Failed to fetch weekly words:", err);
+      } catch (error) {
+        console.error("Failed to fetch weekly words:", error);
+        setMessage("Failed to load words");
       } finally {
-        setLoading(false); // Zakończ ładowanie
+        setLoading(false);
       }
     };
 
-    fetchWords();
-  }, []);
+    loadWords();
+  }, [uid]);
 
   const handleSubmit = async () => {
     const currentWord = words[currentIndex];
-
     if (!currentWord) return;
 
     const isCorrect = currentWord.translations.includes(userInput.trim());
 
     if (isCorrect) {
-      // Promote if eligible
       try {
-        await fetch(
-          "https://backend-305143166666.europe-central2.run.app/promote-word",
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              word: currentWord.word,
-              fromCollection: currentWord.level,
-            }),
-          }
-        );
+        await promoteWord(uid, currentWord.word, currentWord.level);
         setMessage("✅ Correct! Word promoted.");
       } catch (err) {
         setMessage("✅ Correct! But promotion failed.");
@@ -77,9 +67,14 @@ const WeeklyTestComponent = () => {
     setCurrentIndex((prev) => prev + 1);
   };
 
+  if (loading) {
+    return <StyledMessage>Loading...</StyledMessage>;
+  }
+
   if (currentIndex >= words.length) {
     return <StyledMessage>🎉 Test completed!</StyledMessage>;
   }
+
   return (
     <StyledContainer>
       <StyledTitle>Weekly Test</StyledTitle>
@@ -88,11 +83,11 @@ const WeeklyTestComponent = () => {
         value={userInput}
         onChangeText={(text: string) => setUserInput(text)}
         placeholder="Your translation"
-        disabled={loading} // Wyłącz pole w trakcie ładowania
+        disabled={loading}
       />
-      <StyledButton onPress={handleSubmit} disabled={loading}>
-        <StyledButtonText>{loading ? "Loading..." : "Submit"}</StyledButtonText>
-      </StyledButton>
+      <Button type="action" onPress={handleSubmit} disabled={loading}>
+        <ButtonText>{loading ? "Loading..." : "Submit"}</ButtonText>
+      </Button>
       <StyledMessage>{message}</StyledMessage>
     </StyledContainer>
   );

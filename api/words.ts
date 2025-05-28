@@ -1,6 +1,5 @@
-import { get } from "react-native/Libraries/TurboModule/TurboModuleRegistry";
-
-const BASE_URL = "https://backend-305143166666.europe-central2.run.app";
+import Constants from "expo-constants";
+const BASE_URL = Constants.expoConfig?.extra?.apiUrl;
 
 export const validateAndTranslateWord = async (
   text: string
@@ -34,9 +33,7 @@ export const saveWord = async (
 export const getWords = async (uid: string) => {
   if (!uid) throw new Error("Missing UID");
 
-  const response = await fetch(
-    `https://backend-305143166666.europe-central2.run.app/get-words?uid=${uid}`
-  );
+  const response = await fetch(`${BASE_URL}/get-words?uid=${uid}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch words");
@@ -81,27 +78,62 @@ export const fetchAccountLevel = async (
 };
 export const fetchCorrectWords = async (uid: string) => {
   if (!uid) throw new Error("Missing UID");
-  const res = await fetch(
-    `https://backend-305143166666.europe-central2.run.app/get-correct-words?uid=${uid}`
-  );
+  const res = await fetch(`${BASE_URL}/get-correct-words?uid=${uid}`);
   if (!res.ok) throw new Error("Failed to fetch correct words");
   return await res.json();
 };
 
 export const fetchExpertWords = async (uid: string) => {
   if (!uid) throw new Error("Missing UID");
-  const res = await fetch(
-    `https://backend-305143166666.europe-central2.run.app/expertWords?uid=${uid}`
-  );
+  const res = await fetch(`${BASE_URL}/expertWords?uid=${uid}`);
   if (!res.ok) throw new Error("Failed to fetch expert words");
   return await res.json();
 };
 
 export const fetchIncorrectWords = async (uid: string) => {
   if (!uid) throw new Error("Misssing UID");
-  const res = await fetch(
-    `https://backend-305143166666.europe-central2.run.app/get-incorrect-words?uid=${uid}`
-  );
+  const res = await fetch(`${BASE_URL}/get-incorrect-words?uid=${uid}`);
   if (!res.ok) throw new Error("Failed to fetch incorrect words");
   return await res.json();
+};
+
+export interface Word {
+  word: string;
+  translations: string[];
+  level: "incorrectWords" | "correctWords" | "expertWords";
+}
+export const fetchWeeklyWords = async (uid: string): Promise<Word[]> => {
+  if (!uid) throw new Error("Missing UID");
+  const response = await fetch(`${BASE_URL}/get-weekly-words?uid=${uid}`);
+  if (!response.ok) throw new Error("Failed to fetch weekly words");
+  return response.json();
+};
+
+export const promoteWord = async (
+  uid: string,
+  word: string,
+  fromCollection: string
+) => {
+  if (!uid) throw new Error("Missing UID");
+  const response = await fetch(`${BASE_URL}/promote-word`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ uid, word, fromCollection }),
+  });
+  if (!response.ok) throw new Error("Failed to promote word");
+  return response.json();
+};
+
+export const fetchMonthlyWords = async (uid: string): Promise<Word[]> => {
+  if (!uid) throw new Error("Missing UID");
+
+  const response = await fetch(`${BASE_URL}/get-monthly-words?uid=${uid}`);
+  if (!response.ok) throw new Error("Failed to fetch monthly words");
+
+  const data = await response.json();
+
+  return data.map((word: any) => ({
+    ...word,
+    level: "expertWords",
+  }));
 };

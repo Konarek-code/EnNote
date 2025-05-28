@@ -69,15 +69,27 @@ export const LevelText = styled.Text`
   color: white;
   font-weight: bold;
 `;
+interface ActionButtonProps {
+  secondary?: boolean;
+  disabled?: boolean;
+}
 
-export const ActionButton = styled(BaseButton)<{ secondary: boolean }>`
-  background: ${({ secondary }: { secondary: boolean }) =>
-    secondary ? "#8884d8" : "#6a1b9a"};
+interface ActionButtonStyledProps {
+  secondary: boolean;
+  disabled?: boolean;
+}
+
+export const ActionButton = styled(BaseButton)<ActionButtonStyledProps>`
+  background: ${({ secondary, disabled }: ActionButtonStyledProps) =>
+    disabled ? "#999999" : secondary ? "#8884d8" : "#6a1b9a"};
+  opacity: ${({ disabled }: ActionButtonStyledProps) => (disabled ? 0.6 : 1)};
   padding: 12px 20px;
   border-radius: 10px;
-  shadow-opacity: 0.3;
-  shadow-radius: 4px;
-  elevation: 5;
+  elevation: ${({ disabled }: ActionButtonStyledProps) => (disabled ? 0 : 5)};
+  shadow-opacity: ${({ disabled }: ActionButtonStyledProps) =>
+    disabled ? 0 : 0.3};
+  shadow-radius: ${({ disabled }: ActionButtonStyledProps) =>
+    disabled ? 0 : 4}px;
 `;
 
 export const MenuButton = styled.TouchableOpacity`

@@ -43,23 +43,6 @@ export const StyledInput = styled.TextInput<StyledInputProps>`
     `}
 `;
 
-interface StyledButtonProps {
-  disabled?: boolean;
-}
-
-export const StyledButton = styled.TouchableOpacity<StyledButtonProps>`
-  background-color: ${(props: StyledButtonProps) =>
-    props.disabled ? "#94a3b8" : "#3b82f6"};
-  padding: 14px;
-  border-radius: 8px;
-  align-items: center;
-`;
-
-export const StyledButtonText = styled.Text`
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-`;
 export const StyledMessage = styled.Text`
   margin-top: 20px;
   font-size: 16px;

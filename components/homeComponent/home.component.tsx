@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Container, StyledImage } from "./home.component.style";
 
 import WordInputSection from "../wordInput/wordInputSection.component";
@@ -8,12 +8,17 @@ import TestScreen from "../testScreen/basicTest/testscreen";
 import { useCounter } from "@/hooks/useCounter";
 import { getWords } from "@/api/words";
 import { useTestLogic } from "@/hooks/useTestLogic";
+import {
+  setFirstTestStarted,
+  setTestStartTimestamp,
+} from "@/store/user/userSlice";
 
 const HomeComponent: React.FC = () => {
   const { resetCounter } = useCounter();
   const user = useSelector((state: any) => state.user);
 
   const [isTestStarted, setIsTestStarted] = useState(false);
+  const dispatch = useDispatch();
 
   const {
     words,
@@ -51,6 +56,14 @@ const HomeComponent: React.FC = () => {
             onTestReady={() => {
               setIsTestStarted(true);
               resetCounter();
+              if (!user.firstTestStarted) {
+                dispatch(setFirstTestStarted(true));
+                dispatch(
+                  setTestStartTimestamp(
+                    Math.floor(Date.now() / 1000).toString()
+                  )
+                );
+              }
             }}
           />
         </Container>

@@ -177,3 +177,8 @@ export const LogoutButtonText = styled.Text`
   font-weight: bold;
   text-align: center;
 `;
+
+export const IndicatorContainer = styled.View`
+  justify-content: center;
+  align-items: center;
+`;

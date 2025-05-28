@@ -14,7 +14,8 @@ import { store } from "@/store/store";
 export const register = async (
   email: string,
   password: string,
-  name: string
+  name: string,
+  gender: string
 ) => {
   const auth = getAuth();
 
@@ -24,13 +25,15 @@ export const register = async (
     password
   );
   const user = userCredential.user;
+
   await setDoc(doc(db, "users", user.uid), {
-    name: name,
-    email: email,
+    name,
+    email,
     createdAt: new Date(),
+    gender,
   });
 
-  await updateProfile(userCredential.user, {
+  await updateProfile(user, {
     displayName: name,
   });
 
@@ -46,16 +49,51 @@ export async function loginUser(email: string, password: string) {
   );
   const user = userCredential.user;
 
+  const docRef = doc(db, "users", user.uid);
+  const userDoc = await getDoc(docRef);
+  const gender = userDoc.exists() ? userDoc.data()?.gender || "" : "";
+
   store.dispatch(
     login({
       name: user.displayName || "",
       email: user.email || "",
       uid: user.uid,
       createdAt: user.metadata?.creationTime || "",
+      gender: gender,
     })
   );
 
   return user;
 }
-
 export const logoutUser = () => signOut(auth);
+
+export const completeGoogleUserProfile = async (
+  uid: string,
+  name: string,
+  gender: string
+) => {
+  const docRef = doc(db, "users", uid);
+  await setDoc(docRef, {
+    name,
+    gender,
+    createdAt: new Date(),
+    email: auth.currentUser?.email || "",
+  });
+
+  if (auth.currentUser) {
+    await updateProfile(auth.currentUser, {
+      displayName: name,
+    });
+
+    // Od razu zaktualizuj dane w Redux
+    store.dispatch(
+      login({
+        uid,
+        name,
+        gender,
+        email: auth.currentUser.email || "",
+        createdAt: auth.currentUser.metadata?.creationTime || "",
+      })
+    );
+  }
+};

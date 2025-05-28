@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react"; // ⬅️ dodaj `useEffect`
 import { Alert, ActivityIndicator } from "react-native";
 import { Formik } from "formik";
 import * as Yup from "yup";
@@ -23,6 +23,8 @@ import {
   SignupBold,
   SignupWrapper,
 } from "./login.component.style";
+import { useAuth } from "@/utils/AuthProvider";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // ⬅️ dodaj to
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Invalid email").required("Email is required"),
@@ -32,16 +34,19 @@ const LoginSchema = Yup.object().shape({
 });
 
 const LoginScreen = () => {
+  const { signInWithGoogle } = useAuth();
   const router = useRouter();
 
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     await signInWithGoogle();
-  //     router.replace("/(tabs)/screens/profile");
-  //   } catch (error: any) {
-  //     Alert.alert("Google Sign In Error", error.message);
-  //   }
-  // };
+  useEffect(() => {
+    const checkIfNewUser = async () => {
+      const isNew = await AsyncStorage.getItem("isNewGoogleUser");
+      if (isNew === "true") {
+        await AsyncStorage.removeItem("isNewGoogleUser");
+        router.push("/(tabs)/screens/completeProfile");
+      }
+    };
+    checkIfNewUser();
+  }, []);
 
   return (
     <Container>
@@ -105,17 +110,13 @@ const LoginScreen = () => {
                 <ButtonPrimaryText>Sign in</ButtonPrimaryText>
               )}
             </Button>
-            <HorizontalLine></HorizontalLine>
+            <HorizontalLine />
             <BreakText> or </BreakText>
             <Button
               type="google"
               disabled={isSubmitting}
               onPress={() => {
-                // TODO: Implement Google sign-in logic here
-                Alert.alert(
-                  "Google Sign In",
-                  "Google sign-in not implemented yet."
-                );
+                signInWithGoogle();
               }}
             >
               <GoogleIconImage source={GoogleIcon} />
@@ -128,7 +129,7 @@ const LoginScreen = () => {
       <SignupWrapper
         onPress={() => router.push("/(tabs)/screens/registerScreen")}
       >
-        <SignupRegular>dont have account? </SignupRegular>
+        <SignupRegular>don’t have an account? </SignupRegular>
         <SignupBold>Sign Up</SignupBold>
       </SignupWrapper>
     </Container>

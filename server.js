@@ -3,7 +3,6 @@ import cors from "cors";
 import dotenv from "dotenv";
 import fetch from "node-fetch";
 import { db } from "./utils/firebaseAdmin.js";
-import { doc, getDoc } from "firebase/firestore";
 
 dotenv.config();
 const app = express();
@@ -339,7 +338,6 @@ app.get("/expertWords", async (req, res) => {
   }
 });
 
-// Uruchomienie serwera
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
