@@ -1,25 +1,24 @@
-import React from "react";
-import { Platform } from "react-native";
-import { Input, Wrapper } from "./wordInput.style";
+import React from 'react';
+import { Platform } from 'react-native';
+
+import { Input, Wrapper } from './wordInput.style';
 
 type WordInputProps = {
   value: string;
-  onChangeText: (text: string) => void;
+  onChangeText: () => void;
   placeholder?: string;
 };
 
 const WordInput: React.FC<WordInputProps> = ({
   value,
   onChangeText,
-  placeholder = "Type a word",
+  placeholder = 'Type a word',
 }) => {
   return (
-    <Wrapper behavior={Platform.OS === "ios" ? "padding" : undefined}>
+    <Wrapper behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <Input
         value={value}
-        onChangeText={(text: string) => {
-          onChangeText(text);
-        }}
+        onChangeText={onChangeText}
         placeholder={placeholder}
         keyboardType="default"
       />

@@ -1,4 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+
+import { fetchMonthlyWords, promoteWord, Word } from "@/api/words"; // <- upewnij się, że ścieżka jest poprawna
+import Button from "@/components/buttons/button.component";
+import { ButtonText } from "@/components/buttons/button.styles";
+
 import {
   StyledMessage,
   StyledContainer,
@@ -6,10 +12,6 @@ import {
   StyledParagraph,
   StyledInput,
 } from "./monthlyTest.style";
-import { useSelector } from "react-redux";
-import { fetchMonthlyWords, promoteWord, Word } from "@/api/words"; // <- upewnij się, że ścieżka jest poprawna
-import Button from "@/components/buttons/button.component";
-import { ButtonText } from "@/components/buttons/button.styles";
 
 const MonthlyTestComponent = () => {
   const [words, setWords] = useState<Word[]>([]);

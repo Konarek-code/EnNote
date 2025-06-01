@@ -5,11 +5,14 @@ import {
   signOut,
   updateProfile,
 } from "firebase/auth";
-import { db } from "./firebaseConfig";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth } from "./firebaseConfig";
-import { login } from "@/store/user/userSlice";
+
 import { store } from "@/store/store";
+import { login } from "@/store/user/userSlice";
+
+import { db } from "./firebaseConfig";
+import { auth } from "./firebaseConfig";
+
 
 export const register = async (
   email: string,
@@ -85,7 +88,6 @@ export const completeGoogleUserProfile = async (
       displayName: name,
     });
 
-    // Od razu zaktualizuj dane w Redux
     store.dispatch(
       login({
         uid,

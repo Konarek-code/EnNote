@@ -1,6 +1,6 @@
-import { AppState } from "react-native";
-import { useEffect, useRef } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useRef } from "react";
+import { AppState } from "react-native";
 
 const saveUsageTime = async (milliseconds: number) => {
   try {
@@ -10,7 +10,7 @@ const saveUsageTime = async (milliseconds: number) => {
       : milliseconds;
     await AsyncStorage.setItem("usageTime", total.toString());
   } catch (e) {
-    console.error("Błąd zapisu czasu:", e);
+    console.error("time save error:", e);
   }
 };
 
@@ -48,7 +48,7 @@ export const getUsageTime = async () => {
     const value = await AsyncStorage.getItem("usageTime");
     return value ? parseInt(value, 10) : 0;
   } catch (e) {
-    console.error("Błąd odczytu czasu:", e);
+    console.error("time read error:", e);
     return 0;
   }
 };

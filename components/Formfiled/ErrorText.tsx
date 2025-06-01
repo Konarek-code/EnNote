@@ -1,4 +1,6 @@
-import { StyledErrorText } from "./form.style";
+import React from 'react';
+
+import { StyledErrorText } from './form.style';
 
 const ErrorText = ({ children }: { children: React.ReactNode }) => {
   return <StyledErrorText>{children}</StyledErrorText>;

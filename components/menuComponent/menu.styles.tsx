@@ -1,5 +1,5 @@
-import styled from "styled-components/native";
 import { LinearGradient } from "expo-linear-gradient";
+import styled from "styled-components/native";
 
 export const Container = styled(LinearGradient).attrs({
   colors: ["#0D47A1", "#311B92"], // Gradient: granat → fiolet

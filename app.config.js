@@ -1,26 +1,28 @@
-import "dotenv/config";
+/* eslint-disable */
+
+import 'dotenv/config';
 export default {
   expo: {
-    name: "EnNote",
-    slug: "EnNote",
-    version: "1.0.0",
-    orientation: "portrait",
-    icon: "./assets/images/icon.png",
-    scheme: "myapp",
-    userInterfaceStyle: "automatic",
+    name: 'EnNote',
+    slug: 'EnNote',
+    version: '1.0.0',
+    orientation: 'portrait',
+    icon: './assets/images/icon.png',
+    scheme: 'myapp',
+    userInterfaceStyle: 'automatic',
     newArchEnabled: true,
-    assetBundlePatterns: ["**/*"],
+    assetBundlePatterns: ['**/*'],
     ios: {
       supportsTablet: true,
     },
     android: {
-      package: "com.damianoitaliano.EnNote",
+      package: 'com.damianoitaliano.EnNote',
     },
     web: {
-      bundler: "metro",
-      output: "static",
+      bundler: 'metro',
+      output: 'static',
     },
-    plugins: ["expo-router", "expo-font"],
+    plugins: ['expo-router', 'expo-font'],
     experiments: {
       typedRoutes: true,
     },
@@ -32,9 +34,9 @@ export default {
       },
 
       eas: {
-        projectId: "f7a748e8-554f-435e-a27c-e0ac3cca8be6",
+        projectId: 'f7a748e8-554f-435e-a27c-e0ac3cca8be6',
       },
     },
-    owner: "damianoitaliano",
+    owner: 'damianoitaliano',
   },
 };

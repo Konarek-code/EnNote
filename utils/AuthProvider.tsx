@@ -1,3 +1,11 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as Google from "expo-auth-session/providers/google";
+import Constants from "expo-constants";
+import {
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithCredential,
+} from "firebase/auth";
 import React, {
   FC,
   ReactNode,
@@ -5,17 +13,11 @@ import React, {
   useContext,
   useEffect,
 } from "react";
-import { auth } from "./firebaseConfig";
-import {
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithCredential,
-} from "firebase/auth";
 import { useDispatch } from "react-redux";
+
+import { auth } from "./firebaseConfig";
 import { login, logout } from "../store/user/userSlice";
-import * as Google from "expo-auth-session/providers/google";
-import Constants from "expo-constants";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 
 interface AuthContextType {
   signInWithGoogle: () => void;

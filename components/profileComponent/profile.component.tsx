@@ -1,7 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { RootState } from "@/store/store";
-import { ActivityIndicator } from "react-native";
+import { useFocusEffect } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+
+import { fetchAccountLevel } from '@/api/words';
+import { useWordStats } from '@/hooks/useWordsStats';
+import { RootState } from '@/store/store';
+import { logout } from '@/store/user/userSlice';
+
 import {
   Container,
   ProfileHeader,
@@ -28,18 +35,11 @@ import {
   LogoutButtonText,
   AchievementDescription,
   IndicatorContainer,
-} from "./profile.style";
-import { useRouter } from "expo-router";
-import { logout } from "@/store/user/userSlice";
-import { useFocusEffect } from "@react-navigation/native";
-import { useWordStats } from "@/hooks/useWordsStats";
-import { fetchAccountLevel } from "@/api/words";
+} from './profile.style';
 
 const ProfileComponent = () => {
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [activeAchievement, setActiveAchievement] = useState<string | null>(
-    null
-  );
+  const [activeAchievement, setActiveAchievement] = useState<string | null>(null);
 
   const [accountLevel, setAccountLevel] = useState<string | null>(null);
   const user = useSelector((state: RootState) => state.user);
@@ -48,23 +48,21 @@ const ProfileComponent = () => {
   const dispatch = useDispatch();
 
   const profileImage =
-    user.gender === "female"
-      ? require("@/assets/images/profileW.png")
-      : require("@/assets/images/profile.png");
+    user.gender === 'female'
+      ? require('@/assets/images/profileW.png')
+      : require('@/assets/images/profile.png');
 
   const formattedDate = user.createdAt
-    ? new Date(user.createdAt).toLocaleDateString("pl-PL")
-    : "error getting date";
+    ? new Date(user.createdAt).toLocaleDateString('pl-PL')
+    : 'error getting date';
 
-  const { correctCount, expertCount, incorrectCount, loading } = useWordStats(
-    user?.uid ?? ""
-  );
+  const { correctCount, expertCount, incorrectCount } = useWordStats(user?.uid ?? '');
   const totalWords = correctCount + expertCount + incorrectCount;
 
   useFocusEffect(
     React.useCallback(() => {
       if (!isLoggedIn) {
-        router.replace("/(tabs)/screens/loginScreen");
+        router.replace('/(tabs)/screens/loginScreen');
       } else {
         setCheckingAuth(false);
       }
@@ -90,20 +88,20 @@ const ProfileComponent = () => {
         <ProfileBackground>
           <ProfileImage source={profileImage} />
         </ProfileBackground>
-        <Username>{user.name || "Guest"}</Username>
-        <Handle>@{user.email || "no-email"}</Handle>
+        <Username>{user.name || 'Guest'}</Username>
+        <Handle>@{user.email || 'no-email'}</Handle>
       </ProfileHeader>
       <StatsContainer>
         <StatBox>
-          <StatLabel>Words {"\n"}overall</StatLabel>
+          <StatLabel>Words {'\n'}overall</StatLabel>
           <StatValue>{totalWords}</StatValue>
         </StatBox>
         <StatBox>
-          <StatLabel>Words {"\n"}well known</StatLabel>
+          <StatLabel>Words {'\n'}well known</StatLabel>
           <StatValue>{correctCount}</StatValue>
         </StatBox>
         <StatBox>
-          <StatLabel>Words {"\n"} expert level</StatLabel>
+          <StatLabel>Words {'\n'} expert level</StatLabel>
           <StatValue>{expertCount}</StatValue>
         </StatBox>
       </StatsContainer>
@@ -119,40 +117,28 @@ const ProfileComponent = () => {
       </DetailsBox>
       <AchievementsTitle>Achievements</AchievementsTitle>
       <AchievementsContainer>
-        <AchievementBox
-          onPress={() => setActiveAchievement("Academic Excellence")}
-        >
-          <AchivmentIcons
-            source={require("@/assets/images/academic-achievement.png")}
-          />
+        <AchievementBox onPress={() => setActiveAchievement('Academic Excellence')}>
+          <AchivmentIcons source={require('@/assets/images/academic-achievement.png')} />
         </AchievementBox>
 
-        <AchievementBox
-          onPress={() => setActiveAchievement("Consistent Success")}
-        >
-          <AchivmentIcons source={require("@/assets/images/success.png")} />
+        <AchievementBox onPress={() => setActiveAchievement('Consistent Success')}>
+          <AchivmentIcons source={require('@/assets/images/success.png')} />
         </AchievementBox>
 
-        <AchievementBox
-          onPress={() => setActiveAchievement("Vocabulary Master")}
-        >
-          <AchivmentIcons
-            source={require("@/assets/images/testAchivment.png")}
-          />
+        <AchievementBox onPress={() => setActiveAchievement('Vocabulary Master')}>
+          <AchivmentIcons source={require('@/assets/images/testAchivment.png')} />
         </AchievementBox>
 
-        <AchievementBox onPress={() => setActiveAchievement("Badge Collector")}>
-          <AchivmentIcons source={require("@/assets/images/badge.png")} />
+        <AchievementBox onPress={() => setActiveAchievement('Badge Collector')}>
+          <AchivmentIcons source={require('@/assets/images/badge.png')} />
         </AchievementBox>
       </AchievementsContainer>
-      {activeAchievement && (
-        <AchievementDescription>{activeAchievement}</AchievementDescription>
-      )}
+      {activeAchievement && <AchievementDescription>{activeAchievement}</AchievementDescription>}
 
       <LogoutButton
         onPress={() => {
           dispatch(logout());
-          router.replace("/(tabs)/screens/loginScreen");
+          router.replace('/(tabs)/screens/loginScreen');
         }}
       >
         <LogoutButtonText>Logout</LogoutButtonText>

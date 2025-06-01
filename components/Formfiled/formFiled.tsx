@@ -1,17 +1,18 @@
-import React from "react";
-import Input from "./formInput";
-import ErrorText from "./ErrorText";
+import React from 'react';
+
+import ErrorText from './ErrorText';
+import Input from './formInput';
 
 interface FormFieldProps {
   placeholder: string;
   value: string;
-  onChangeText: (text: string) => void;
+  onChangeText: () => void;
   onBlur: () => void;
   error?: string;
   touched?: boolean;
   secureTextEntry?: boolean;
   editable?: boolean;
-  keyboardType?: "default" | "email-address" | "numeric" | "phone-pad";
+  keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
   hasError?: boolean;
 }
 
@@ -24,7 +25,7 @@ const FormField: React.FC<FormFieldProps> = ({
   touched,
   secureTextEntry = false,
   editable = true,
-  keyboardType = "default",
+  keyboardType = 'default',
 }) => (
   <>
     <Input

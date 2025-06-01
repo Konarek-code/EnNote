@@ -1,7 +1,8 @@
-import React from "react";
-import { Tabs } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Tabs } from "expo-router";
+import React from "react";
 import { StyleSheet } from "react-native";
+
 import NavigationBar from "@/components/navigationBar/navigationBar";
 
 export default () => {

@@ -1,17 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { Container, StyledImage } from "./home.component.style";
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
-import WordInputSection from "../wordInput/wordInputSection.component";
-import TestScreen from "../testScreen/basicTest/testscreen";
+import { getWords } from '@/api/words';
+import { useCounter } from '@/hooks/useCounter';
+import { useTestLogic } from '@/hooks/useTestLogic';
+import { setFirstTestStarted, setTestStartTimestamp } from '@/store/user/userSlice';
 
-import { useCounter } from "@/hooks/useCounter";
-import { getWords } from "@/api/words";
-import { useTestLogic } from "@/hooks/useTestLogic";
-import {
-  setFirstTestStarted,
-  setTestStartTimestamp,
-} from "@/store/user/userSlice";
+import { Container, StyledImage } from './home.component.style';
+import TestScreen from '../testComponents/basicTest/testscreen';
+import WordInputSection from '../wordInputSection/wordInputSection.component';
 
 const HomeComponent: React.FC = () => {
   const { resetCounter } = useCounter();
@@ -37,7 +34,7 @@ const HomeComponent: React.FC = () => {
         const wordsFromApi = await getWords(user.uid);
         setWords(wordsFromApi);
       } catch (error) {
-        console.error("Error fetching words:", error);
+        console.error('Error fetching words:', error);
       }
     };
 
@@ -50,7 +47,7 @@ const HomeComponent: React.FC = () => {
     <>
       {!isTestStarted ? (
         <Container>
-          <StyledImage source={require("../../assets/images/Iconpage.png")} />
+          <StyledImage source={require('../../assets/images/Iconpage.png')} />
           <WordInputSection
             onWordAdded={(word) => setWords((prev) => [...prev, word])}
             onTestReady={() => {
@@ -58,11 +55,7 @@ const HomeComponent: React.FC = () => {
               resetCounter();
               if (!user.firstTestStarted) {
                 dispatch(setFirstTestStarted(true));
-                dispatch(
-                  setTestStartTimestamp(
-                    Math.floor(Date.now() / 1000).toString()
-                  )
-                );
+                dispatch(setTestStartTimestamp(Math.floor(Date.now() / 1000).toString()));
               }
             }}
           />

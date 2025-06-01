@@ -1,5 +1,6 @@
 import React from "react";
 import { TextInputProps } from "react-native";
+
 import { StyledInput } from "./form.style";
 
 interface InputProps extends TextInputProps {

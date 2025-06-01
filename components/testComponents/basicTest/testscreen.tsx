@@ -1,24 +1,27 @@
-import React from "react";
-import WordInput from "../../inputWordComponent/wordInput.component";
+import React from 'react';
+
+import Button from '@/components/buttons/button.component';
+import { ButtonText } from '@/components/buttons/button.styles';
+
 import {
   Container,
-  StyledButton,
-  ButtonText,
   Title,
   QuestionText,
   WordText,
   FeedbackContainer,
-} from "./testScreen.style";
-import { Text } from "react-native";
+  InformationText,
+  FeedbackText,
+} from './testScreen.style';
+import WordInput from '../../inputWordComponent/wordInput.component';
 
 interface TestScreenProps {
   words: { word: string; translations: string[] }[];
   currentIndex: number;
   userAnswer: string;
-  onAnswerChange: (text: string) => void;
+  onAnswerChange: () => void;
   onCheckAnswer: () => Promise<void>;
   onEndTest: () => void;
-  answerFeedback: "correct" | "incorrect" | null;
+  answerFeedback: 'correct' | 'incorrect' | null;
 }
 
 const TestScreen: React.FC<TestScreenProps> = ({
@@ -36,14 +39,10 @@ const TestScreen: React.FC<TestScreenProps> = ({
     return (
       <Container>
         <Title>No Words Available</Title>
-        <Text
-          style={{ textAlign: "center", marginBottom: 10, color: "#cfcfcf" }}
-        >
-          You must add at least one word before starting a test.
-        </Text>
-        <StyledButton onPress={onEndTest}>
+        <InformationText>You must add at least one word before starting a test.</InformationText>
+        <Button type="primary" onPress={onEndTest}>
           <ButtonText>Back</ButtonText>
-        </StyledButton>
+        </Button>
       </Container>
     );
   }
@@ -58,17 +57,9 @@ const TestScreen: React.FC<TestScreenProps> = ({
 
       {answerFeedback && (
         <FeedbackContainer feedback={answerFeedback}>
-          <Text
-            style={{
-              color: answerFeedback === "correct" ? "green" : "red",
-              fontSize: 16,
-              textAlign: "center",
-            }}
-          >
-            {answerFeedback === "correct"
-              ? "✅ Good job!"
-              : "👎 Oops, that's not quite right!"}
-          </Text>
+          <FeedbackText feedback={answerFeedback}>
+            {answerFeedback === 'correct' ? '✅ Good job!' : "👎 Oops, that's not quite right!"}
+          </FeedbackText>
         </FeedbackContainer>
       )}
 
@@ -76,13 +67,13 @@ const TestScreen: React.FC<TestScreenProps> = ({
 
       <WordInput value={userAnswer} onChangeText={onAnswerChange} />
 
-      <StyledButton onPress={onCheckAnswer}>
+      <Button type="primary" onPress={onCheckAnswer}>
         <ButtonText>Check Answer</ButtonText>
-      </StyledButton>
+      </Button>
 
-      <StyledButton onPress={onEndTest}>
+      <Button type="primary" onPress={onEndTest}>
         <ButtonText>End Test</ButtonText>
-      </StyledButton>
+      </Button>
     </Container>
   );
 };

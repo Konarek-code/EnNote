@@ -1,6 +1,7 @@
 import React from "react";
-import HomeComponent from "../../../components/homeComponent/home.component";
+
 import { Container } from "./homePage.style";
+import HomeComponent from "../../../components/homeComponent/home.component";
 
 const HomePage = () => {
   return (

@@ -30,17 +30,6 @@ export const WordText = styled.Text`
   margin-bottom: 20px;
 `;
 
-export const StyledButton = styled.TouchableOpacity`
-  background-color: #5e60ce;
-  padding: 12px 24px;
-  margin-top: 12px;
-  border-radius: 12px;
-`;
-
-export const ButtonText = styled.Text`
-  color: #ffffff;
-  font-size: 16px;
-`;
 interface FeedbackContainerProps {
   feedback: "correct" | "incorrect" | null;
 }
@@ -56,4 +45,17 @@ export const FeedbackContainer = styled.View<FeedbackContainerProps>`
   border-radius: 10px;
   padding: 10px;
   margin-bottom: 10px;
+`;
+export const InformationText = styled.Text`
+  text-align: center;
+  margin-bottom: 10px;
+  color: #cfcfcf;
+  font-size: 16px;
+`;
+
+export const FeedbackText = styled.Text<FeedbackContainerProps>`
+  color: ${({ feedback }: FeedbackContainerProps) =>
+    feedback === "correct" ? "green" : "red"};
+  font-size: 16px;
+  text-align: center;
 `;

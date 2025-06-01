@@ -1,4 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+
+import { fetchWeeklyWords, promoteWord } from "@/api/words";
+import Button from "@/components/buttons/button.component";
+import { ButtonText } from "@/components/buttons/button.styles";
+
 import {
   StyledMessage,
   StyledContainer,
@@ -6,10 +12,6 @@ import {
   StyledParagraph,
   StyledInput,
 } from "./weeklyTest.style";
-import { fetchWeeklyWords, promoteWord } from "@/api/words"; // import Twoich funkcji API
-import { useSelector } from "react-redux"; // lub inny sposób na pobranie UID
-import Button from "@/components/buttons/button.component";
-import { ButtonText } from "@/components/buttons/button.styles";
 
 interface Word {
   word: string;

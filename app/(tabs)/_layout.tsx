@@ -1,8 +1,10 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
 import { Provider } from "react-redux";
-import { store } from "../../store/store";
+
 import AuthProvider from "@/utils/AuthProvider";
+
+import { store } from "../../store/store";
 
 const StackLayout = () => {
   return (

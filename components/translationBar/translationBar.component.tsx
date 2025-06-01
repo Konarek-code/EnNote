@@ -1,9 +1,9 @@
 import React from "react";
+
 import {
   TranslationBarContainer,
   TranslationText,
 } from "./translationBar.style";
-import { Text } from "react-native"; // Używamy komponentu Text z React Native zamiast h2
 
 interface TranslationBarProps {
   translation: string | null;

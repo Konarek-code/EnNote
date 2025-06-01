@@ -33,10 +33,10 @@ yarn-error.*
 .env*.local
 .env
 serviceAccountKey.json
+google-services.json
+firebaseConfig.ts
+
 # typescript
 *.tsbuildinfo
 
 app-example
-
-
-firebaseConfig.ts

@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+
+import { clearWords } from "@/api/words";
 import { setTestResult } from "@/store/testResult.slicer";
 import { saveTestResult } from "@/utils/testHistory";
-import { clearWords } from "@/api/words";
 
 type Word = {
   word: string;
