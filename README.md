@@ -44,3 +44,21 @@ This application is built using **React Native** and **Expo** for the frontend. 
 - Node.js installed
 - Expo CLI installed (`npm install -g expo-cli`)
 - Firebase project setup
+### Steps
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/Konarek-code/EnNote.git
+cd EnNote
+```
+
+2. **Install dependencies**
+   npm install
+
+# or if you prefer yarn
+
+yarn install
+
+3. **Configure environment variables**
+   Create a .env file in the root directory (you can copy .env.example if available)
