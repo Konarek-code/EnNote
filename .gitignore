@@ -34,7 +34,6 @@ yarn-error.*
 .env
 serviceAccountKey.json
 google-services.json
-firebaseConfig.ts
 
 # typescript
 *.tsbuildinfo

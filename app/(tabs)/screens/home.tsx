@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
-import { Container } from "./homePage.style";
-import HomeComponent from "../../../components/homeComponent/home.component";
+import { Container } from '../../../additionalStyles/homePage.style';
+import HomeComponent from '../../../components/homeComponent/home.component';
 
 const HomePage = () => {
   return (

@@ -12,7 +12,8 @@ import TranslationBar from '../translationBar/translationBar.component';
 
 type WordEntry = { word: string; translations: string[] };
 type Props = {
-  onWordAdded: () => void;
+  // eslint-disable-next-line no-unused-vars
+  onWordAdded: (word: WordEntry) => void;
   onTestReady: () => void;
 };
 const WordInputSection: React.FC<Props> = ({ onWordAdded, onTestReady }) => {

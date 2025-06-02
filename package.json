@@ -12,10 +12,8 @@
     "test": "jest --watchAll",
     "predeploy": "expo export -p web",
     "deploy-hosting": "npm run predeploy && firebase deploy --only hosting",
-  "lint": "eslint .",
-"lint:fix": "eslint . --fix"
-
-
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "jest": {
     "preset": "jest-expo"
@@ -23,6 +21,8 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-firebase/app": "^22.2.0",
+    "@react-native-firebase/auth": "^22.2.0",
     "@react-native-google-signin/google-signin": "^14.0.1",
     "@react-native-picker/picker": "^2.11.0",
     "@react-navigation/bottom-tabs": "^7.2.0",
@@ -31,7 +31,6 @@
     "@reduxjs/toolkit": "^2.8.0",
     "cors": "^2.8.5",
     "expo": "~52.0.35",
-    "expo-app-loading": "^2.1.1",
     "expo-auth-session": "~6.0.3",
     "expo-blur": "~14.0.3",
     "expo-constants": "~17.0.8",
@@ -46,7 +45,7 @@
     "expo-system-ui": "~4.0.8",
     "expo-web-browser": "~14.0.2",
     "express": "^4.21.2",
-    "firebase": "^11.3.1",
+    "firebase": "^11.8.1",
     "firebase-admin": "^13.2.0",
     "formik": "^2.4.6",
     "jest-expo": "^52.0.4",
@@ -71,7 +70,9 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
-    "@types/jest": "^29.5.12",
+    "@types/hoist-non-react-statics": "^3.3.6",
+    "@types/jest": "^29.5.14",
+    "@types/prop-types": "^15.7.14",
     "@types/react": "~18.3.12",
     "@types/react-native": "^0.72.8",
     "@types/react-test-renderer": "^18.3.0",

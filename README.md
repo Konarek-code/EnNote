@@ -44,6 +44,10 @@ This application is built using **React Native** and **Expo** for the frontend. 
 - Node.js installed
 - Expo CLI installed (`npm install -g expo-cli`)
 - Firebase project setup
+<<<<<<< HEAD
+=======
+
+>>>>>>> ff65a7f ( final tweaks)
 ### Steps
 
 1. **Clone the repository**
